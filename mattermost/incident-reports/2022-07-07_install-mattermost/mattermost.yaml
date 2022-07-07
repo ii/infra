@@ -1,0 +1,98 @@
+apiVersion: installation.mattermost.com/v1beta1
+kind: Mattermost
+metadata:
+  name: mattermost
+  namespace: mattermost
+spec:
+  database:
+    external:
+      secret: mattermost-database
+  fileStore:
+    operatorManaged:
+      replicas: 1
+      resources:
+        requests:
+          cpu: 150m
+          memory: 512Mi
+      storageSize: 50Gi
+  image: mattermost/mattermost-enterprise-edition
+  imagePullPolicy: IfNotPresent
+  ingressName: mattermost.zachmandeville.pair.sharing.io
+  useIngressTLS: true
+  ingressAnnotations:
+    kubernetes.io/ingress.class: contour-external
+  replicas: 1
+  scheduling:
+    resources:
+      limits:
+        cpu: "2"
+        memory: 4Gi
+      requests:
+        cpu: 150m
+        memory: 256Mi
+  version: "5.39"
+  mattermostEnv:
+    - name: MM_LOGSETTINGS_FILELEVEL
+      value: "DEBUG"
+    - name: MM_EMAILSETTINGS_ENABLESIGNINWITHEMAIL
+      value: "true"
+    - name: MM_EMAILSETTINGS_ENABLESIGNINWITHUSERNAME
+      value: "true"
+    - name: MM_EMAILSETTINGS_SENDEMAILNOTIFICATIONS
+      value: "true"
+    - name: MM_EMAILSETTINGS_REQUIREEMAILVERIFICATION
+      value: "false"
+    - name: MM_EMAILSETTINGS_FEEDBACKEMAIL
+      value: "mattermost@ii.coop"
+    - name: MM_EMAILSETTINGS_FEEDBACKORGANIZATION
+      value: "ii.coop"
+    - name: MM_EMAILSETTINGS_SENDEMAILNOTIFICATIONS
+      value: "true"
+    - name: MM_EMAILSETTINGS_SENDPUSHNOTIFICATIONS
+      value: "true"
+    - name: MM_EMAILSETTINGS_PUSHNOTIFICATIONSERVER
+      value: "https://push-test.mattermost.com"
+    - name: MM_EMAILSETTINGS_PUSHNOTIFICATIONCONTENTS
+      value: "full"
+    - name: MM_EMAILSETTINGS_ENABLESMTPAUTH
+      value: "true"
+    - name: MM_EMAILSETTINGS_ENABLESIGNINWITHEMAIL
+      valueFrom:
+        secretKeyRef:
+          name: mattermost-user-config
+          key: MM_EMAILSETTINGS_ENABLESIGNINWITHEMAIL
+    - name: MM_EMAILSETTINGS_ENABLESIGNINWITHUSERNAME
+      valueFrom:
+        secretKeyRef:
+          name: mattermost-user-config
+          key: MM_EMAILSETTINGS_ENABLESIGNINWITHUSERNAME
+    - name: MM_EMAILSETTINGS_FEEDBACKNAME
+      valueFrom:
+        secretKeyRef:
+          name: mattermost-user-config
+          key: MM_EMAILSETTINGS_FEEDBACKNAME
+    - name: MM_EMAILSETTINGS_SMTPUSERNAME
+      valueFrom:
+        secretKeyRef:
+          name: mattermost-user-config
+          key: MM_EMAILSETTINGS_SMTPUSERNAME
+    - name: MM_EMAILSETTINGS_SMTPPASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: mattermost-user-config
+          key: MM_EMAILSETTINGS_SMTPPASSWORD
+    - name: MM_EMAILSETTINGS_SMTPSERVER
+      valueFrom:
+        secretKeyRef:
+          name: mattermost-user-config
+          key: MM_EMAILSETTINGS_SMTPSERVER
+    - name: MM_EMAILSETTINGS_SMTPPORT
+      valueFrom:
+        secretKeyRef:
+          name: mattermost-user-config
+          key: MM_EMAILSETTINGS_SMTPPORT
+    - name: MM_EMAILSETTINGS_CONNECTIONSECURITY
+      valueFrom:
+        secretKeyRef:
+          name: mattermost-user-config
+          key: MM_EMAILSETTINGS_CONNECTIONSECURITY

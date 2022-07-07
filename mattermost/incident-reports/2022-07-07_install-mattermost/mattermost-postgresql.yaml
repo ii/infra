@@ -1,0 +1,30 @@
+# DONE install postgres
+# We will use the existing yaml for our mattermost install
+
+apiVersion: "acid.zalan.do/v1"
+kind: postgresql
+metadata:
+  name: mattermost-db
+spec:
+  enableConnectionPooler: true
+  connectionPooler:
+    mode: session
+    resources:
+      requests:
+        cpu: 250m
+        memory: 100Mi
+      limits:
+        cpu: "1"
+        memory: 100Mi
+  teamId: "mattermost"
+  volume:
+    size: 50Gi
+  numberOfInstances: 3
+  users:
+    mattermost:  # database owner
+    - superuser
+    - createdb
+  databases:
+    mattermost: mattermost  # dbname: owner
+  postgresql:
+    version: "13"
