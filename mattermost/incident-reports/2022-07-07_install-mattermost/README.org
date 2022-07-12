@@ -1,10 +1,33 @@
 #+TITLE: 2022 07 07_install Mattermost
+#+PROPERTY: header-args: :comment no
 
-* Goal
-Install mattermost with our existing data, following instructions given by mattermost support.  This way, if there's any issues, we can reply to support using the methods
-and deployment they understand.
-* Steps
-** DONE Install postgres operator
+* Background
+On 4 July 2022, we attempted an upgrade to mattermost, going from 5.37 to 7.0.
+We did this on our production environment, thinking it would be a simple change
+in our mattermost manifest with an hour of downtime. There were errors in the
+upgrade, and when we tried to downgrade back to 5.37, we were unable to connect
+mattermost to the database. Our chat infrastructure was down, and it was unclear
+how we would get it up.
+
+The team moved to a temporary Slack workspace, and we(Caleb and Zach) opened a support
+ticket with mattermost to see if they could diagnose the issue.  They asked us to
+follow the deployment steps outlined in their docs and reply with a set of log files so
+they could further help us.
+* Goals
+- Deploy mattermost at our previous version, following official documentation
+- Migrate our backup data to this newly deployed mattermost
+- Diagnose what the issue was in our migration with mattermost support
+- Design a better deployment and upgrade pattern for ii to use with our infra.
+* Deploy mattermost following official documentation
+Our support rep gave us a [[https://docs.mattermost.com/install/install-kubernetes.html#rolling-upgrades][link for rolling upgrades]] for us to follow. Our last committed
+version of mattermost, according to the ii/org repo, was 5.37 so our goal now is to follow
+these instructions and get a working instance up at 5.37 with all our data.
+** Install postgres operator
+Mattermost's basic architecture is a server, database, and webclient.  We're using postgres
+for the database, and mattermost has an official k8s operator to use with their postgres deployment.
+This will essentially handle the day-to-day operating of the db.
+
+We add the helm manifest repo, setup an operator.yaml, and then clone down the latest(at time of writing) official yaml
 #+begin_src shell
 helm repo add postgres-operator-charts https://opensource.zalando.com/postgres-operator/charts/postgres-operator
 helm -n postgres-operator template --create-namespace postgres-operator postgres-operator-charts/postgres-operator > ./postgres-operator.yaml
@@ -12,15 +35,8 @@ curl -s -O -L https://github.com/zalando/postgres-operator/raw/v1.8.2/manifests/
 curl -s -O -L https://github.com/zalando/postgres-operator/raw/v1.8.2/manifests/operatorconfiguration.crd.yaml
 #+end_src
 
-#+RESULTS:
-#+begin_example
-"postgres-operator-charts" already exists with the same configuration, skipping
-#+end_example
 
-List the charts
-#+begin_src tmate
-helm search repo postgres-operator-charts
-#+end_src
+With the necessary parts brought down, we apply it to our cluster.
 
 #+begin_src shell
 kubectl create namespace postgres-operator -o yaml --dry-run=client \
@@ -43,7 +59,7 @@ deployment.apps/postgres-operator created
 operatorconfiguration.acid.zalan.do/postgres-operator created
 #+end_example
 
-See what's 'a happening!!
+Checking our new namespace, we see the operator pod is up and ready to go.
 #+begin_src shell
 kubectl -n postgres-operator get pods
 #+end_src
@@ -58,7 +74,7 @@ Get the values for the chart
 #+begin_src tmate
 helm show values postgres-operator-charts/postgres-operator | less
 #+end_src
-** DONE create our working namespace
+** Create our working namespace
 this is where all our applications will be running, e.g. mattermost and its database
 #+begin_src shell
 kubectl create namespace mattermost -o yaml --dry-run=client \
@@ -70,8 +86,269 @@ kubectl create namespace mattermost -o yaml --dry-run=client \
 namespace/mattermost created
 #+end_example
 
-** DONE install postgres
-We will use the existing yaml for our mattermost install
+** Install postgres
+We install the mattermost db from a k8s manifest.  We copied down
+the existing manifest from our mattermost install and deployed that.
+You can find the manifest in the [[*Mattermost DB manifest][appendix of this document.]]
+
+Apply this yaml
+#+begin_src shell
+kubectl -n mattermost apply -f ./mattermost-postgresql.yaml
+#+end_src
+
+#+RESULTS:
+#+begin_example
+postgresql.acid.zalan.do/mattermost-db created
+#+end_example
+
+And validate that it is running
+
+#+begin_src shell
+kubectl -n mattermost get pods,postgresql,svc
+#+end_src
+
+#+RESULTS:
+#+begin_example
+NAME                                        READY   STATUS    RESTARTS   AGE
+pod/mattermost-db-0                         1/1     Running   0          82s
+pod/mattermost-db-1                         1/1     Running   0          71s
+pod/mattermost-db-2                         1/1     Running   0          23s
+pod/mattermost-db-pooler-79879bc8bf-5xr6l   1/1     Running   0          7s
+pod/mattermost-db-pooler-79879bc8bf-t6f6v   1/1     Running   0          7s
+
+NAME                                     TEAM         VERSION   PODS   VOLUME   CPU-REQUEST   MEMORY-REQUEST   AGE   STATUS
+postgresql.acid.zalan.do/mattermost-db   mattermost   13        3      50Gi                                    83s   Running
+
+NAME                           TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE
+service/mattermost-db          ClusterIP   10.110.59.194   <none>        5432/TCP   83s
+service/mattermost-db-config   ClusterIP   None            <none>        <none>     74s
+service/mattermost-db-pooler   ClusterIP   10.104.20.127   <none>        5432/TCP   7s
+service/mattermost-db-repl     ClusterIP   10.100.196.12   <none>        5432/TCP   83s
+#+end_example
+
+** Install minio operator
+
+Minio handles the object storage for our instance.  We'll use the official
+operator manifest from mattermost.
+
+#+begin_src shell
+curl -s -O -L https://raw.githubusercontent.com/mattermost/mattermost-operator/v1.18.1/docs/minio-operator/minio-operator.yaml
+#+end_src
+
+create namespace and apply the yaml
+
+#+begin_src shell
+kubectl create namespace minio-operator -o yaml --dry-run=client \
+    | kubectl apply -f -
+kubectl -n minio-operator apply -f ./minio-operator.yaml
+#+end_src
+
+#+RESULTS:
+#+begin_example
+namespace/minio-operator created
+customresourcedefinition.apiextensions.k8s.io/minioinstances.miniocontroller.min.io created
+clusterrole.rbac.authorization.k8s.io/minio-operator-role created
+serviceaccount/minio-operator-sa created
+clusterrolebinding.rbac.authorization.k8s.io/minio-operator-binding created
+deployment.apps/minio-operator created
+#+end_example
+
+Lastly, we validate the operator pod is up and working.
+#+begin_src shell
+kubectl -n minio-operator get pods
+#+end_src
+
+#+RESULTS:
+#+begin_example
+NAME                              READY   STATUS    RESTARTS   AGE
+minio-operator-67c4c9cb88-bzkp7   1/1     Running   0          22s
+#+end_example
+
+** Install mattermost operators
+For the mattermost server, we follow the same process as the other operators.
+Use the official manifest:
+#+begin_src shell :results silent
+curl -s -O -L https://raw.githubusercontent.com/mattermost/mattermost-operator/v1.18.1/docs/mattermost-operator/mattermost-operator.yaml
+#+end_src
+
+Create a namespace and apply the manifest
+#+begin_src shell
+kubectl create ns mattermost-operator -o yaml --dry-run=client \
+    | kubectl apply -f -
+kubectl apply -n mattermost-operator -f ./mattermost-operator.yaml
+#+end_src
+
+#+RESULTS:
+#+begin_example
+namespace/mattermost-operator created
+customresourcedefinition.apiextensions.k8s.io/clusterinstallations.mattermost.com created
+customresourcedefinition.apiextensions.k8s.io/mattermostrestoredbs.mattermost.com created
+customresourcedefinition.apiextensions.k8s.io/mattermosts.installation.mattermost.com created
+serviceaccount/mattermost-operator created
+clusterrole.rbac.authorization.k8s.io/mattermost-operator created
+clusterrolebinding.rbac.authorization.k8s.io/mattermost-operator created
+service/mattermost-operator created
+deployment.apps/mattermost-operator created
+#+end_example
+
+Validate it's working.
+
+#+begin_src shell
+kubectl -n mattermost-operator get pods
+#+end_src
+
+#+RESULTS:
+#+begin_example
+NAME                                   READY   STATUS    RESTARTS   AGE
+mattermost-operator-6b6c89cf5c-jzj5v   1/1     Running   0          19s
+#+end_example
+
+** Create local manifest file according to our needs
+
+We are deploying this on a pair environment that has DNS, but we want to
+make sure mattermost is using TLS and the correct domain.  So we are going to
+create a certs.yaml and a mattermost.yaml and apply both.  Certs will handle TLS,
+mattermost.yaml will handle the rest.
+
+Both manifests can be found in our appendix:[[*Mattermost cert manifest][ cert.yaml]]  and [[*Mattermost server manifest][mattermost.yaml]]
+
+** Create db secret
+We create this secret to use as a password for our database, which
+we then use to generate a db connection string.
+
+Where are the existing generated secrets?
+#+begin_src shell
+kubectl -n mattermost get secret
+#+end_src
+
+#+RESULTS:
+#+begin_example
+NAME                                                            TYPE                                  DATA   AGE
+default-token-rvffp                                             kubernetes.io/service-account-token   3      52m
+mattermost-database                                             Opaque                                1      4m2s
+mattermost.mattermost-db.credentials.postgresql.acid.zalan.do   Opaque                                2      51m
+pooler.mattermost-db.credentials.postgresql.acid.zalan.do       Opaque                                2      51m
+postgres-pod-token-wbqqb                                        kubernetes.io/service-account-token   3      51m
+postgres.mattermost-db.credentials.postgresql.acid.zalan.do     Opaque                                2      51m
+standby.mattermost-db.credentials.postgresql.acid.zalan.do      Opaque                                2      51m
+#+end_example
+
+Create a connection string using the generated password
+#+begin_src shell
+POSTGRES_PASSWORD="$(kubectl -n mattermost get secret mattermost.mattermost-db.credentials.postgresql.acid.zalan.do -o=jsonpath='{.data.password}' | base64 -d)"
+kubectl -n mattermost create secret generic mattermost-database --from-literal=DB_CONNECTION_STRING="postgres://mattermost:$POSTGRES_PASSWORD@mattermost-db-pooler:5432/mattermost?sslmode=require" -o yaml --dry-run=client | \
+    kubectl apply -f -
+#+end_src
+
+#+RESULTS:
+#+begin_example
+secret/mattermost-database configured
+#+end_example
+
+** Create user-config secret
+
+Similar to the db connection string, we create secrets for the config env vars used in our [[*Mattermost server manifest][Mattermost server manifest]]
+#+begin_src shell
+kubectl -n mattermost create secret generic mattermost-user-config \
+    --from-literal=MM_EMAILSETTINGS_ENABLESIGNINWITHUSERNAME="true" \
+    --from-literal=MM_EMAILSETTINGS_ENABLESIGNINWITHEMAIL="true" \
+    --from-literal=MM_EMAILSETTINGS_FEEDBACKNAME="mattermost.ii.coop" \
+    --from-literal=MM_EMAILSETTINGS_SMTPUSERNAME="lmaolol" \
+    --from-literal=MM_EMAILSETTINGS_SMTPPASSWORD="hahaha" \
+    --from-literal=MM_EMAILSETTINGS_SMTPSERVER="smtp.gmail.com" \
+    --from-literal=MM_EMAILSETTINGS_SMTPPORT="587" \
+    --from-literal=MM_EMAILSETTINGS_CONNECTIONSECURITY="STARTTLS" \
+    --dry-run=client \
+    -o yaml | kubectl apply -f -
+#+end_src
+
+
+#+RESULTS:
+#+begin_example
+secret/mattermost-user-config created
+#+end_example
+
+You will see in the manifest that the value for the env vars points to k8s secrets.
+** Install mattermost
+
+With everything set up.and the files in our appendix tangled to this local dir, we can
+apply the manifests and install mattermost.
+
+#+begin_src shell
+kubectl -n mattermost apply -f ./cert.yaml -f ./mattermost.yaml
+#+end_src
+
+#+RESULTS:
+#+begin_example
+certificate.cert-manager.io/letsencrypt-prod-mattermost unchanged
+mattermost.installation.mattermost.com/mattermost created
+#+end_example
+
+Here we validate that everything is running as planned.
+
+#+begin_src shell
+kubectl -n mattermost get certs,challenges,mattermost,pods,ing
+#+end_src
+
+#+RESULTS:
+#+begin_example
+NAME                                                      READY   SECRET                                               AGE
+certificate.cert-manager.io/letsencrypt-prod-mattermost   True    mattermost-zachmandeville-pair-sharing-io-tls-cert   85m
+
+NAME                                                STATE    IMAGE                                      VERSION   ENDPOINT
+mattermost.installation.mattermost.com/mattermost   stable   mattermost/mattermost-enterprise-edition   5.39      mattermost.zachmandeville.pair.sharing.io
+
+NAME                                        READY   STATUS    RESTARTS   AGE
+pod/mattermost-7f89fc46d4-5m22n             1/1     Running   0          61s
+pod/mattermost-db-0                         1/1     Running   0          2m34s
+pod/mattermost-db-1                         1/1     Running   0          2m23s
+pod/mattermost-db-2                         1/1     Running   0          95s
+pod/mattermost-db-pooler-79879bc8bf-5xr6l   1/1     Running   0          79s
+pod/mattermost-db-pooler-79879bc8bf-t6f6v   1/1     Running   0          79s
+pod/mattermost-minio-0                      1/1     Running   0          61s
+
+NAME                                   CLASS    HOSTS                                       ADDRESS   PORTS     AGE
+ingress.networking.k8s.io/mattermost   <none>   mattermost.zachmandeville.pair.sharing.io             80, 443   61s
+#+end_example
+
+* Migrate our Data to new deployment
+When mattermost starts up, it creates the schema it needs and populates a
+mattermost db in our postgres instance. To migrate our data, we want to drop
+this existing db, then copy over our backup sql file created using pg_dump.
+
+We logged into psql using our generated k8s secret
+#+begin_example shell
+export PGPASSWORD="$(kubectl -n mattermost get secret mattermost.mattermost-db.credentials.postgresql.acid.zalan.do -o=jsonpath='{.data.password}' | base64 -d)"
+psql -U mattermost -h mattermost-db.mattermost -d postgres
+#+end_example
+
+Then, within this client, dropped and created a fresh mattermost db.
+#+begin_example psql
+#in psql
+drop database mattermost with (force);
+create database mattermost;
+#+end_example
+
+Our backup file was cloned down to a tmp folder, then loaded into the mattermost db
+#+begin_example shell
+psql -U mattermost -h mattermost-db.mattermost -d mattermost < /tmp/mattermost-db.sql
+#+end_example
+
+We were able to log in to psql and check the channels, users, and last public posts to see that the data matched what we expected and the
+migration seemed to work.
+
+* Try to log into new website and reply to support rep.
+We deployed to mattermost.zachmandeville.pair.sharing.io, and since the db had our data,
+we assumed we should be able to login.  Neither of us could log in, even after attempting to
+change our passwords in the db.  We also found we coudln't use the mattermost cli to change our
+password.  Either our deployment was missing something, or our database was missing something.
+Either way, it felt we had enough to write back to the support rep.
+
+We copied our config.json, mattermost.yaml, and last bit of logs from our mattermost pod and
+attached it to a reply where we detailed this same progress and issue.
+* Appendix
+** Mattermost DB manifest
+#+NAME: Mattermost DB manifest
 #+begin_src yaml :tangle ./mattermost-postgresql.yaml
 apiVersion: "acid.zalan.do/v1"
 kind: postgresql
@@ -102,111 +379,8 @@ spec:
     version: "13"
 #+end_src
 
-#+begin_src shell
-kubectl -n mattermost apply -f ./mattermost-postgresql.yaml
-#+end_src
-
-#+RESULTS:
-#+begin_example
-postgresql.acid.zalan.do/mattermost-db created
-#+end_example
-
-#+begin_src shell
-kubectl -n mattermost get pods,postgresql,svc
-#+end_src
-
-#+RESULTS:
-#+begin_example
-NAME                                        READY   STATUS    RESTARTS   AGE
-pod/mattermost-db-0                         1/1     Running   0          82s
-pod/mattermost-db-1                         1/1     Running   0          71s
-pod/mattermost-db-2                         1/1     Running   0          23s
-pod/mattermost-db-pooler-79879bc8bf-5xr6l   1/1     Running   0          7s
-pod/mattermost-db-pooler-79879bc8bf-t6f6v   1/1     Running   0          7s
-
-NAME                                     TEAM         VERSION   PODS   VOLUME   CPU-REQUEST   MEMORY-REQUEST   AGE   STATUS
-postgresql.acid.zalan.do/mattermost-db   mattermost   13        3      50Gi                                    83s   Running
-
-NAME                           TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE
-service/mattermost-db          ClusterIP   10.110.59.194   <none>        5432/TCP   83s
-service/mattermost-db-config   ClusterIP   None            <none>        <none>     74s
-service/mattermost-db-pooler   ClusterIP   10.104.20.127   <none>        5432/TCP   7s
-service/mattermost-db-repl     ClusterIP   10.100.196.12   <none>        5432/TCP   83s
-#+end_example
-
-** DONE install minio operator
-bring in the yaml
-#+begin_src shell
-curl -s -O -L https://raw.githubusercontent.com/mattermost/mattermost-operator/v1.18.1/docs/minio-operator/minio-operator.yaml
-#+end_src
-
-#+RESULTS:
-#+begin_example
-#+end_example
-
-create namespace and apply the yaml
-#+begin_src shell
-kubectl create namespace minio-operator -o yaml --dry-run=client \
-    | kubectl apply -f -
-kubectl -n minio-operator apply -f ./minio-operator.yaml
-#+end_src
-
-#+RESULTS:
-#+begin_example
-namespace/minio-operator created
-customresourcedefinition.apiextensions.k8s.io/minioinstances.miniocontroller.min.io created
-clusterrole.rbac.authorization.k8s.io/minio-operator-role created
-serviceaccount/minio-operator-sa created
-clusterrolebinding.rbac.authorization.k8s.io/minio-operator-binding created
-deployment.apps/minio-operator created
-#+end_example
-#+begin_src shell
-kubectl -n minio-operator get pods
-#+end_src
-
-#+RESULTS:
-#+begin_example
-NAME                              READY   STATUS    RESTARTS   AGE
-minio-operator-67c4c9cb88-bzkp7   1/1     Running   0          22s
-#+end_example
-
-** DONE Install mattermost operators
-we'll use the mattermost official yaml
-#+begin_src shell :results silent
-curl -s -O -L https://raw.githubusercontent.com/mattermost/mattermost-operator/v1.18.1/docs/mattermost-operator/mattermost-operator.yaml
-#+end_src
-
-
-#+begin_src shell
-kubectl create ns mattermost-operator -o yaml --dry-run=client \
-    | kubectl apply -f -
-kubectl apply -n mattermost-operator -f ./mattermost-operator.yaml
-#+end_src
-
-#+RESULTS:
-#+begin_example
-namespace/mattermost-operator created
-customresourcedefinition.apiextensions.k8s.io/clusterinstallations.mattermost.com created
-customresourcedefinition.apiextensions.k8s.io/mattermostrestoredbs.mattermost.com created
-customresourcedefinition.apiextensions.k8s.io/mattermosts.installation.mattermost.com created
-serviceaccount/mattermost-operator created
-clusterrole.rbac.authorization.k8s.io/mattermost-operator created
-clusterrolebinding.rbac.authorization.k8s.io/mattermost-operator created
-service/mattermost-operator created
-deployment.apps/mattermost-operator created
-#+end_example
-
-#+begin_src shell
-kubectl -n mattermost-operator get pods
-#+end_src
-
-#+RESULTS:
-#+begin_example
-NAME                                   READY   STATUS    RESTARTS   AGE
-mattermost-operator-6b6c89cf5c-jzj5v   1/1     Running   0          19s
-#+end_example
-
-** DONE Create local manifest file according to our neeeeeeeeds
+** Mattermost cert manifest
+#+NAME: cert.yaml
 #+begin_src yaml :tangle ./cert.yaml
 apiVersion: cert-manager.io/v1
 kind: Certificate
@@ -222,6 +396,8 @@ spec:
   dnsNames:
     - mattermost.zachmandeville.pair.sharing.io
 #+end_src
+** Mattermost server manifest
+#+NAME: mattermost.yaml
 #+begin_src yaml :tangle ./mattermost.yaml
 apiVersion: installation.mattermost.com/v1beta1
 kind: Mattermost
@@ -322,219 +498,9 @@ spec:
           name: mattermost-user-config
           key: MM_EMAILSETTINGS_CONNECTIONSECURITY
 #+end_src
-** DONE Create db secret
-Where are the existing generated secrets
-#+begin_src shell
-kubectl -n mattermost get secret
-#+end_src
-
-#+RESULTS:
-#+begin_example
-NAME                                                            TYPE                                  DATA   AGE
-default-token-rvffp                                             kubernetes.io/service-account-token   3      52m
-mattermost-database                                             Opaque                                1      4m2s
-mattermost.mattermost-db.credentials.postgresql.acid.zalan.do   Opaque                                2      51m
-pooler.mattermost-db.credentials.postgresql.acid.zalan.do       Opaque                                2      51m
-postgres-pod-token-wbqqb                                        kubernetes.io/service-account-token   3      51m
-postgres.mattermost-db.credentials.postgresql.acid.zalan.do     Opaque                                2      51m
-standby.mattermost-db.credentials.postgresql.acid.zalan.do      Opaque                                2      51m
-#+end_example
-
-Create a connection string using the generated password
-#+begin_src shell
-POSTGRES_PASSWORD="$(kubectl -n mattermost get secret mattermost.mattermost-db.credentials.postgresql.acid.zalan.do -o=jsonpath='{.data.password}' | base64 -d)"
-kubectl -n mattermost create secret generic mattermost-database --from-literal=DB_CONNECTION_STRING="postgres://mattermost:$POSTGRES_PASSWORD@mattermost-db-pooler:5432/mattermost?sslmode=require" -o yaml --dry-run=client | \
-    kubectl apply -f -
-#+end_src
-
-#+RESULTS:
-#+begin_example
-secret/mattermost-database configured
-#+end_example
-
-** DONE Create user-config secret
-#+begin_src shell
-kubectl -n mattermost create secret generic mattermost-user-config \
-    --from-literal=MM_EMAILSETTINGS_ENABLESIGNINWITHUSERNAME="true" \
-    --from-literal=MM_EMAILSETTINGS_ENABLESIGNINWITHEMAIL="true" \
-    --from-literal=MM_EMAILSETTINGS_FEEDBACKNAME="mattermost.ii.coop" \
-    --from-literal=MM_EMAILSETTINGS_SMTPUSERNAME="lmaolol" \
-    --from-literal=MM_EMAILSETTINGS_SMTPPASSWORD="hahaha" \
-    --from-literal=MM_EMAILSETTINGS_SMTPSERVER="smtp.gmail.com" \
-    --from-literal=MM_EMAILSETTINGS_SMTPPORT="587" \
-    --from-literal=MM_EMAILSETTINGS_CONNECTIONSECURITY="STARTTLS" \
-    --dry-run=client \
-    -o yaml | kubectl apply -f -
-#+end_src
-
-#+RESULTS:
-#+begin_example
-secret/mattermost-user-config created
-#+end_example
-
-** TODO Install mattermost according to the instructions given to us by our representative.
-[[https://docs.mattermost.com/install/install-kubernetes.html#rolling-upgrades][their instructions]]
-
-Install to our hearts' content
-#+begin_src shell
-kubectl -n mattermost apply -f ./cert.yaml -f ./mattermost.yaml
-#+end_src
-
-#+RESULTS:
-#+begin_example
-certificate.cert-manager.io/letsencrypt-prod-mattermost unchanged
-mattermost.installation.mattermost.com/mattermost created
-#+end_example
-
-#+begin_src shell
-kubectl -n mattermost get certs,challenges,mattermost,pods,ing
-#+end_src
-
-#+RESULTS:
-#+begin_example
-NAME                                                      READY   SECRET                                               AGE
-certificate.cert-manager.io/letsencrypt-prod-mattermost   True    mattermost-zachmandeville-pair-sharing-io-tls-cert   85m
-
-NAME                                                STATE    IMAGE                                      VERSION   ENDPOINT
-mattermost.installation.mattermost.com/mattermost   stable   mattermost/mattermost-enterprise-edition   5.39      mattermost.zachmandeville.pair.sharing.io
-
-NAME                                        READY   STATUS    RESTARTS   AGE
-pod/mattermost-7f89fc46d4-5m22n             1/1     Running   0          61s
-pod/mattermost-db-0                         1/1     Running   0          2m34s
-pod/mattermost-db-1                         1/1     Running   0          2m23s
-pod/mattermost-db-2                         1/1     Running   0          95s
-pod/mattermost-db-pooler-79879bc8bf-5xr6l   1/1     Running   0          79s
-pod/mattermost-db-pooler-79879bc8bf-t6f6v   1/1     Running   0          79s
-pod/mattermost-minio-0                      1/1     Running   0          61s
-
-NAME                                   CLASS    HOSTS                                       ADDRESS   PORTS     AGE
-ingress.networking.k8s.io/mattermost   <none>   mattermost.zachmandeville.pair.sharing.io             80, 443   61s
-#+end_example
-** DONE Check out the logs
-#+begin_src tmate
-kubectl -n mattermost logs -l app=mattermost --tail=100 -f
-#+end_src
-**  copy down the config.json
-#+begin_src shell
-kubectl -n mattermost exec -it deployment/mattermost -- cat /mattermost/config/config.json > ./config.json
-#+end_src
-
-#+RESULTS:
-#+begin_example
-#+end_example
-
-This config is the default one mattermost uses, but certain values are overridden by env vars we pass in.  For example, this config says our log lvel is set to "info",
-but we pass in an env to set it to "debug" and that is the actual log level
-
-** TODO Migrate our data to this new installation
-#+begin_src shell
-tree /tmp
-#+end_src
-
-#+RESULTS:
-#+begin_example
-/tmp
-├── babel-0ot2tz
-│   └── ob-input-YTTTWl
-├── emacs1000
-│   └── server
-├── emacsc3bi8f
-├── ii.default.target.iisocket
-├── kubeconfig-aSVXP
-├── mattermost-db.sql
-├── snap.lxd [error opening dir]
-├── ssh-UiqFTDUWWB
-│   └── agent.1810598
-├── systemd-private-3efb90cb2be844d8835ee8dfccaa2f81-ModemManager.service-gy9Uvf [error opening dir]
-├── systemd-private-3efb90cb2be844d8835ee8dfccaa2f81-systemd-logind.service-9EqRPg [error opening dir]
-├── systemd-private-3efb90cb2be844d8835ee8dfccaa2f81-systemd-resolved.service-O5iG1h [error opening dir]
-├── systemd-private-3efb90cb2be844d8835ee8dfccaa2f81-systemd-timesyncd.service-YbhLHg [error opening dir]
-└── tmpou_cwzlg [error opening dir]
-
-9 directories, 7 files
-#+end_example
-
-#+begin_src tmate :window psql
-export PGPASSWORD="$(kubectl -n mattermost get secret mattermost.mattermost-db.credentials.postgresql.acid.zalan.do -o=jsonpath='{.data.password}' | base64 -d)"
-psql -U mattermost -h mattermost-db-pooler.mattermost -d mattermost < /tmp/mattermost-db.sql
-#+end_src
-
-#+begin_src shell
-kubectl -n mattermost get svc
-#+end_src
-
-#+RESULTS:
-#+begin_example
-NAME                      TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)             AGE
-mattermost                ClusterIP   None            <none>        8065/TCP,8067/TCP   54m
-mattermost-db             ClusterIP   10.108.64.237   <none>        5432/TCP            111m
-mattermost-db-config      ClusterIP   None            <none>        <none>              111m
-mattermost-db-pooler      ClusterIP   10.109.40.193   <none>        5432/TCP            109m
-mattermost-db-repl        ClusterIP   10.107.149.17   <none>        5432/TCP            111m
-mattermost-minio-hl-svc   ClusterIP   None            <none>        9000/TCP            54m
-#+end_example
-
-*** pg -> mattermost -> restore
-#+begin_src shell
-export PGPASSWORD="$(kubectl -n mattermost get secret mattermost.mattermost-db.credentials.postgresql.acid.zalan.do -o=jsonpath='{.data.password}' | base64 -d)"
-psql -U mattermost -h mattermost-db-pooler.mattermost -d mattermost -c 'select count(*) from users;'
-#+end_src
-
-** TODO see if it breaks
-#+begin_src shell
-kubectl -n mattermost get pods,mattermost
-#+end_src
-
-#+RESULTS:
-#+begin_example
-NAME                                        READY   STATUS    RESTARTS   AGE
-pod/mattermost-7f89fc46d4-5m22n             1/1     Running   0          75s
-pod/mattermost-db-0                         1/1     Running   0          2m48s
-pod/mattermost-db-1                         1/1     Running   0          2m37s
-pod/mattermost-db-2                         1/1     Running   0          109s
-pod/mattermost-db-pooler-79879bc8bf-5xr6l   1/1     Running   0          93s
-pod/mattermost-db-pooler-79879bc8bf-t6f6v   1/1     Running   0          93s
-pod/mattermost-minio-0                      1/1     Running   0          75s
-
-NAME                                                STATE    IMAGE                                      VERSION   ENDPOINT
-mattermost.installation.mattermost.com/mattermost   stable   mattermost/mattermost-enterprise-edition   5.39      mattermost.zachmandeville.pair.sharing.io
-#+end_example
-
-** TODO if breaking, capture logs
-** TODO reply to representative
-#+begin_src
-Hi Representative!
-
-Thank you for the reply. We re-installed our instance following the instructions in your linked page and got further along, but are still having issues migrating our data.
-
-For context:
-We are running mattermost with postgres following the instructions on [linked page]
-Our resulting config.json is attached to this email. We pass in most of our details through ENV vars, though and so the config.json seems to be just the default one.
-We also attached our mattermost.yaml used, with these env vars.
-Our database backup was created using this command:
-psql command
-
-Following the instructions, we were able to get a clean mattermost instance up.  To migrate we
-- logged directly into the db via psql
-- deleted the mattermost db with `drop database with (force);`
-- logged out, then loaded our backup with `psql -U mattermost -h mattermost-db.mattermost -d mattermost < /tmp/mattermost-db.sql`
-
-After doing this migration, we were able to log in via psql and investigate the db.  All the data seemed present and correct(we checked out our channels, users, and posts).
-However, when we go to our mattermost server's webpage, there is now only a login screen and our usernames and passwords do not work.
-we tried to log in via mmctl and were unsuccessful there as well.
-
-Do you recommend a different way of restoring a mattermost database, when the backup is a pg_dump sql file?
-
-We've attached our mattermost.logs as well, if they're helpful.
-
-Thanks,
-hhcalebzachbrenda
-#+end_src
-- can bring up Mattermost instance by itself
-- migrating the data
--
-
-** Tidy up
+** Tidy up scripts
+quick scripts for when we need to bring everything down.  After this, you want to go through the
+deployment steps in [[*Deploy mattermost following official documentation][* Deploy mattermost following official documentation]]
 #+begin_src shell
 kubectl -n mattermost delete -f ./mattermost.yaml -f ./mattermost-postgresql.yaml
 kubectl -n mattermost delete persistentvolumeclaim/mattermost-minio-mattermost-minio-0
