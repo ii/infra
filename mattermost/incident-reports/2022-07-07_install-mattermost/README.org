@@ -346,15 +346,89 @@ Either way, it felt we had enough to write back to the support rep.
 
 We copied our config.json, mattermost.yaml, and last bit of logs from our mattermost pod and
 attached it to a reply where we detailed this same progress and issue.
-* TODO Make suggested changes to our deployment
+* Make suggested changes to our deployment
 Our rep replied and said that our steps looked good and there was nothing they could see in our
 manifests that would cause the issue.  They checked with their k8s team, and a k8s rep suggested
 that if it didn't seem like we could connect to the database, then it might be that the mattermost server
 is not using the right database connection string, and instead using a default one from the config.json
 
-We followed their advice and updated our manifest to allow us to use mmctl locally on the mattermost server and,
+We followed their advice and [[*Mattermost server manifest][updated our manifest]] to allow us to use mmctl locally on the mattermost server and,
 once it was up, issued this command to exec into the pod and set the right connection string.
 
+#+begin_src shell
+kubectl -n mattermost exec -ti deployments/mattermost -- mmctl --local config set SqlSettings.DataSource $MM_CONFIG
+#+end_src
+
+Returning to the webpage, we still could not log in.  We then tried to use mmctl to change our password.
+* TODO Debug with mmctl
+with mmctl, we should be able to change a users password, though we found that when we tried the command
+#+begin_src shell
+# this is run inside the mattermost server pod
+mmctl --local users change-password zz --password <something new
+#+end_src
+it said the user was not found.  Even stranger, when we tried to list the users with
+
+#+begin_src shell
+# from mattermost-server pod
+mmctl --local users list
+#+end_src
+
+it couldn't list any of the users at all. We decided to run the mattermost logs in a seperate tmux window while running this command.
+
+When the command was run, this log appeared
+
+#+begin_example json
+{"level":"error","ts":1657590252.5781875,"caller":"mlog/log.go:251","msg":"We encountered an error while finding user profiles.","path":"/api/v4/users","request_id":"uzkcqw8bbjbt5esntjq
+gq1g3qe","ip_addr":"","user_id":"","method":"GET","err_where":"GetUsersPage","http_code":500,"err_details":"failed to get User profiles: pq: column u.remoteid does not exist"}
+{"level":"debug","ts":1657590252.5783038,"caller":"web/handlers.go:107","msg":"Received HTTP request","method":"GET","url":"/api/v4/users","request_id":"uzkcqw8bbjbt5esntjqgq1g3qe","hos
+t":"_","scheme":"","status_code":"500"}
+#+end_example
+
+So it was connecting to the database, but it wasn't finding the database schema it was expecting.  We double checked our users column, by logging into the db directly, and there was no 'remoteid' column in this table.  We then looked into the mattermost source code and confirmed that when it ran GetUsersPage it was running a sql query that was asking for users.remoteid.  In other words, this version of mattermost is expecting a database schema we are not giving it.
+
+We started to doubt whether 5.37 was our correct version.  Investigating the source code for the problem function, and traversing backwards through the tags,
+we could see that u.remoteid was added in 5.35.  Is it possible we were actually on 5.34?
+
+We then looked through the history of our previous deployment org file and could see that the last committed change before 5.37 was moving mattermost to 5.34.2
+It looked like we might have committed a change to 5.37, but never actually deployed it.
+
+The issue was not with the deployment, the db, or mattermost.  It was an org file/ii protocol issue, and we were trying to downgrade to a version we never
+actually upgraded to.
+* Redeploy using 5.34.2
+We upgraded our mattermost.yaml to 5.34.2, tangled, then applied the manifest again.
+
+#+begin_src shell
+    kubectl -n mattermost apply -f ./cert.yaml -f ./mattermost.yaml
+#+end_src
+
+#+begin_src shell
+kubectl -n mattermost get certs,challenges,mattermost,pods,ing
+#+end_src
+
+#+RESULTS:
+#+begin_example
+NAME                                                      READY   SECRET                                               AGE
+certificate.cert-manager.io/letsencrypt-prod-mattermost   True    mattermost-zachmandeville-pair-sharing-io-tls-cert   4d23h
+
+NAME                                                STATE    IMAGE                                      VERSION   ENDPOINT
+mattermost.installation.mattermost.com/mattermost   stable   mattermost/mattermost-enterprise-edition   5.34.2    mattermost.zachmandeville.pair.sharing.io
+
+NAME                                        READY   STATUS    RESTARTS   AGE
+pod/mattermost-7dfcf4bf67-cw84b             1/1     Running   0          21s
+pod/mattermost-db-0                         1/1     Running   0          61m
+pod/mattermost-db-1                         1/1     Running   0          61m
+pod/mattermost-db-2                         1/1     Running   0          60m
+pod/mattermost-db-pooler-79879bc8bf-8bltf   1/1     Running   0          60m
+pod/mattermost-db-pooler-79879bc8bf-mvs6q   1/1     Running   0          60m
+pod/mattermost-minio-0                      1/1     Running   0          60m
+
+NAME                                   CLASS    HOSTS                                       ADDRESS   PORTS     AGE
+ingress.networking.k8s.io/mattermost   <none>   mattermost.zachmandeville.pair.sharing.io             80, 443   60m
+#+end_example
+
+* Log in successfully and chat with each other
+After this deployment finished, both of us were able to log into mattermost, see the channels we expected and the last messages sent and talk to one another.
+The deployment worked with 5.34.2!
 * Appendix
 ** Mattermost DB manifest
 #+NAME: Mattermost DB manifest
@@ -406,6 +480,8 @@ spec:
     - mattermost.zachmandeville.pair.sharing.io
 #+end_src
 ** Mattermost server manifest
+- Note taken on [2022-07-12 Tue 16:28] \\
+  Switch version to 5.34.2
 - Note taken on [2022-07-12 Tue 16:17] \\
   Add env MM_SERVICE_SETTINGS_ENABLELOCALMODE
 #+NAME: mattermost.yaml
@@ -442,7 +518,7 @@ spec:
       requests:
         cpu: 150m
         memory: 256Mi
-  version: "5.39"
+  version: "5.34.2"
   mattermostEnv:
     - name: MM_LOGSETTINGS_FILELEVEL
       value: "DEBUG"
