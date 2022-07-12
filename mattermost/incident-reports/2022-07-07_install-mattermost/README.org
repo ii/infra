@@ -18,6 +18,13 @@ they could further help us.
 - Migrate our backup data to this newly deployed mattermost
 - Diagnose what the issue was in our migration with mattermost support
 - Design a better deployment and upgrade pattern for ii to use with our infra.
+* Current State
+We realized we were downgrading to the wrong version, and were able to deploy mattermost 5.34.2 to our test cluster and
+migrate all our data successfully.  Next is to establish a proper, maintainable pattern going forward to upgrade up to 7.0 in a safe,
+zero-downtime way.
+
+[[*Remove imperative steps from deployment][Go to current todo]]
+
 * Deploy mattermost following official documentation
 Our support rep gave us a [[https://docs.mattermost.com/install/install-kubernetes.html#rolling-upgrades][link for rolling upgrades]] for us to follow. Our last committed
 version of mattermost, according to the ii/org repo, was 5.37 so our goal now is to follow
@@ -360,7 +367,7 @@ kubectl -n mattermost exec -ti deployments/mattermost -- mmctl --local config se
 #+end_src
 
 Returning to the webpage, we still could not log in.  We then tried to use mmctl to change our password.
-* TODO Debug with mmctl
+* Debug with mmctl
 with mmctl, we should be able to change a users password, though we found that when we tried the command
 #+begin_src shell
 # this is run inside the mattermost server pod
@@ -429,6 +436,24 @@ ingress.networking.k8s.io/mattermost   <none>   mattermost.zachmandeville.pair.s
 * Log in successfully and chat with each other
 After this deployment finished, both of us were able to log into mattermost, see the channels we expected and the last messages sent and talk to one another.
 The deployment worked with 5.34.2!
+* TODO Remove imperative steps from deployment
+At the moment, after we deploy we manually drop,create,then migrate the db and then log into mmctl and set the systemsettings.datasource.  Are these
+steps required in the same way, now that we're using the right version?
+
+If they are, let's figure out how to make them declarative steps to make future deployments easier.
+* TODO investigate websocket issue in current deployment
+While we can log in and chat with one another, i am finding that the client continually becomes disconnected.  Let's spend a small bit of time debugging this,
+seeing if it's an issue with our manifest or a peculiarity of deploying to pair.
+* TODO set up proper upgrade pattern
+We should research the best way to do rolling upgrades with kubernetes and when you're using a db that is having schema migrations.  We want to
+always upgrade in a dev environment, then when that is successful, replicate this in production...or move productiont traffic to this newly upgraded
+instance.
+
+Let's spend some time researching blue/green deployment and service mesh techniques, as well as mattermost's own advice for handling these upgrades, so
+that we can upgrade safely with zero downtime.
+* TODO Use our new upgrade pattern to upgrade from 5.34.0 to 7.0 in our actual cluster
+* TODO Welcome ii back to mattermost.ii.coop
+* TODO CELEBRATE!
 * Appendix
 ** Mattermost DB manifest
 #+NAME: Mattermost DB manifest
