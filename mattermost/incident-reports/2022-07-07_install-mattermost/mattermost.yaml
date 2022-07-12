@@ -34,6 +34,8 @@ spec:
   mattermostEnv:
     - name: MM_LOGSETTINGS_FILELEVEL
       value: "DEBUG"
+    - name: MM_SERVICESETTINGS_ENABLELOCALMODE
+      value: "TRUE"
     - name: MM_EMAILSETTINGS_ENABLESIGNINWITHEMAIL
       value: "true"
     - name: MM_EMAILSETTINGS_ENABLESIGNINWITHUSERNAME

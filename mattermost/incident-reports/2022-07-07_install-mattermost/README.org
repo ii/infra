@@ -346,6 +346,15 @@ Either way, it felt we had enough to write back to the support rep.
 
 We copied our config.json, mattermost.yaml, and last bit of logs from our mattermost pod and
 attached it to a reply where we detailed this same progress and issue.
+* TODO Make suggested changes to our deployment
+Our rep replied and said that our steps looked good and there was nothing they could see in our
+manifests that would cause the issue.  They checked with their k8s team, and a k8s rep suggested
+that if it didn't seem like we could connect to the database, then it might be that the mattermost server
+is not using the right database connection string, and instead using a default one from the config.json
+
+We followed their advice and updated our manifest to allow us to use mmctl locally on the mattermost server and,
+once it was up, issued this command to exec into the pod and set the right connection string.
+
 * Appendix
 ** Mattermost DB manifest
 #+NAME: Mattermost DB manifest
@@ -397,6 +406,8 @@ spec:
     - mattermost.zachmandeville.pair.sharing.io
 #+end_src
 ** Mattermost server manifest
+- Note taken on [2022-07-12 Tue 16:17] \\
+  Add env MM_SERVICE_SETTINGS_ENABLELOCALMODE
 #+NAME: mattermost.yaml
 #+begin_src yaml :tangle ./mattermost.yaml
 apiVersion: installation.mattermost.com/v1beta1
@@ -435,6 +446,8 @@ spec:
   mattermostEnv:
     - name: MM_LOGSETTINGS_FILELEVEL
       value: "DEBUG"
+    - name: MM_SERVICESETTINGS_ENABLELOCALMODE
+      value: "TRUE"
     - name: MM_EMAILSETTINGS_ENABLESIGNINWITHEMAIL
       value: "true"
     - name: MM_EMAILSETTINGS_ENABLESIGNINWITHUSERNAME
