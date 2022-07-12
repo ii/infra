@@ -1,6 +1,3 @@
-# DONE install postgres
-# We will use the existing yaml for our mattermost install
-
 apiVersion: "acid.zalan.do/v1"
 kind: postgresql
 metadata:
