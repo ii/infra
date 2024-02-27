@@ -1,7 +1,15 @@
+resource "random_string" "random" {
+  count   = var.controlplane_nodes
+  length  = 8
+  special = false
+  lower   = true
+  upper   = false
+  numeric = false
+}
 resource "equinix_metal_device" "cp" {
-  count            = var.controlplane_nodes
-  hostname         = "${var.cluster_name}-${count.index + 1}"
-  plan             = var.plan
+  for_each         = { for idx, val in random_string.random : idx => val }
+  hostname         = "${var.cluster_name}-${each.value.result}"
+  plan             = var.equinix_metal_plan
   metro            = var.equinix_metal_metro
   operating_system = "custom_ipxe"
   billing_cycle    = "hourly"
@@ -37,21 +45,10 @@ resource "talos_machine_configuration_apply" "cp" {
          hostname: ${each.value.hostname}
          interfaces:
            - interface: eth0
-             dhcp: true
              vip:
                ip: ${equinix_metal_reserved_ip_block.cluster_virtual_ip.network}
-       install:
-         disk: /dev/sda
-    EOT
-    ,
-    <<-EOT
-    machine:
-       network:
-         interfaces:
-           - interface: eth0
-             dhcp: true
-             vip:
-               ip: ${equinix_metal_reserved_ip_block.cluster_virtual_ip.network}
+               equinixMetal:
+                 apiToken: ${var.equinix_metal_auth_token}
        install:
          disk: /dev/sda
     EOT
@@ -59,7 +56,7 @@ resource "talos_machine_configuration_apply" "cp" {
     <<-EOT
     machine:
        certSANs:
-         - k8s.cloudnative.coop
+         - ${var.kube_apiserver_domain}
          - ${equinix_metal_reserved_ip_block.cluster_virtual_ip.network}
        kubelet:
          extraArgs:
@@ -73,6 +70,10 @@ resource "talos_machine_configuration_apply" "cp" {
        network:
          cni:
            name: none
+       externalCloudProvider:
+         enabled: true
+         manifests:
+           - https://github.com/equinix/cloud-provider-equinix-metal/releases/download/${var.equinix_metal_cloudprovider_controller_version}/deployment.yaml
        controllerManager:
          extraArgs:
            cloud-provider: external
@@ -80,11 +81,21 @@ resource "talos_machine_configuration_apply" "cp" {
          extraArgs:
            cloud-provider: external
          certSANs:
-           - k8s.cloudnative.coop
+           - ${var.kube_apiserver_domain}
            - ${equinix_metal_reserved_ip_block.cluster_virtual_ip.network}
        # Going to try and add this via patch so we can inline the rendered cilium helm template
        inlineManifests:
          - name: cilium
+         - name: cpem-secret
+           contents: |
+             apiVersion: v1
+             stringData:
+               cloud-sa.json: |
+                 {"apiKey": "${var.equinix_metal_auth_token}","projectID": "${var.equinix_metal_project_id}","eipTag":"","eipHealthCheckUseHostIP":true}
+             kind: Secret
+             metadata:
+               name: metal-cloud-config
+               namespace: kube-system
     EOT
     ,
     yamlencode([
@@ -98,7 +109,6 @@ resource "talos_machine_configuration_apply" "cp" {
 }
 
 resource "talos_machine_bootstrap" "bootstrap" {
-  count = var.controlplane_nodes
   depends_on = [
     talos_machine_configuration_apply.cp
   ]

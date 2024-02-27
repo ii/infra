@@ -23,11 +23,23 @@ brew install opentofu
 plan
 
 #+begin_src shell
-opentofu plan -var equinix_metal_project_id=REPLACE_PROJECT_ID_HERE
+tofu destroy -var equinix_metal_project_id=$METAL_PROJECT_ID -var equinix_metal_auth_token=$METAL_AUTH_TOKEN
 #+end_src
 
 apply
 
 #+begin_src shell
-opentofu apply -var equinix_metal_project_id=REPLACE_PROJECT_ID_HERE
+tofu apply -var equinix_metal_project_id=REPLACE_PROJECT_ID_HERE
+#+end_src
+
+get talosconfig
+
+#+begin_src shell
+tofu output -raw talosconfig > ~/.talos/config-cloudnative-coop
+#+end_src
+
+get kubeconfig
+
+#+begin_src shell
+tofu output -raw kubeconfig > ~/.kube/config-cloudnative-coop
 #+end_src
