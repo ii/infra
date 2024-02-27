@@ -34,7 +34,7 @@ data "helm_template" "cilium" {
       autoMount:
         enabled: false
       hostRoot: /sys/fs/cgroup
-    k8sServiceHost: 145.40.90.158
+    k8sServiceHost: ${var.virtual_ip}
     k8sServicePort: 6443
     EOT
   ]

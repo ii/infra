@@ -1,23 +1,25 @@
 resource "equinix_metal_device" "cp" {
   count            = var.controlplane_nodes
   hostname         = "${var.cluster_name}-${count.index + 1}"
-  plan             = "c3.medium.x86"
+  plan             = var.plan
   metro            = "sv"
   operating_system = "custom_ipxe"
   billing_cycle    = "hourly"
   project_id       = var.equinix_metal_project_id
-  ipxe_script_url  = "https://pxe.factory.talos.dev/pxe/376567988ad370138ad8b2698212367b8edcb69b5fd68c80be1f2ec7d603b4ba/v1.6.5/metal-amd64"
+  ipxe_script_url  = var.ipxe_script_url
   always_pxe       = "false"
 }
 
-resource "talos_machine_secrets" "machine_secrets" {}
+resource "talos_machine_secrets" "machine_secrets" {
+  talos_version = var.talos_version
+}
 
-resource "talos_machine_configuration_apply" "cp_config_apply" {
-  for_each              = { for idx, val in equinix_metal_device.cp : idx => val }
-  endpoint              = each.value.network.0.address
-  node                  = each.value.network.0.address
-  talos_config          = talos_client_configuration.talosconfig.talos_config
-  machine_configuration = talos_machine_configuration_controlplane.machineconfig_cp.machine_config
+resource "talos_machine_configuration_apply" "cp" {
+  for_each                    = { for idx, val in equinix_metal_device.cp : idx => val }
+  endpoint                    = each.value.network.0.address
+  node                        = each.value.network.0.address
+  client_configuration        = talos_machine_secrets.machine_secrets.client_configuration
+  machine_configuration_input = data.talos_machine_configuration.controlplane.machine_configuration
   config_patches = [
     <<-EOT
     machine:
@@ -34,16 +36,7 @@ resource "talos_machine_configuration_apply" "cp_config_apply" {
        install:
          disk: /dev/sda
     EOT
-  ]
-}
-
-resource "talos_machine_configuration_controlplane" "machineconfig_cp" {
-  cluster_name     = var.cluster_name
-  cluster_endpoint = var.cluster_endpoint
-  machine_secrets  = talos_machine_secrets.machine_secrets.machine_secrets
-  docs_enabled     = false
-  examples_enabled = false
-  config_patches = [
+    ,
     <<-EOT
     machine:
        network:
@@ -97,21 +90,12 @@ resource "talos_machine_configuration_controlplane" "machineconfig_cp" {
   ]
 }
 
-resource "talos_client_configuration" "talosconfig" {
-  cluster_name    = var.cluster_name
-  machine_secrets = talos_machine_secrets.machine_secrets.machine_secrets
-  endpoints       = [for k, v in equinix_metal_device.cp : v.network.0.address]
-}
-
 resource "talos_machine_bootstrap" "bootstrap" {
-  talos_config = talos_client_configuration.talosconfig.talos_config
-  endpoint     = [for k, v in equinix_metal_device.cp : v.network.0.address][0]
-  node         = [for k, v in equinix_metal_device.cp : v.network.0.address][0]
+  count = var.controlplane_nodes
+  depends_on = [
+    talos_machine_configuration_apply.cp
+  ]
+  client_configuration = talos_machine_secrets.machine_secrets.client_configuration
+  endpoint             = [for k, v in equinix_metal_device.cp : v.network.0.address][0]
+  node                 = [for k, v in equinix_metal_device.cp : v.network.0.address][0]
 }
-
-resource "talos_cluster_kubeconfig" "kubeconfig" {
-  talos_config = talos_client_configuration.talosconfig.talos_config
-  endpoint     = [for k, v in equinix_metal_device.cp : v.network.0.address][0]
-  node         = [for k, v in equinix_metal_device.cp : v.network.0.address][0]
-}
-
