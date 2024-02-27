@@ -1,0 +1,33 @@
+#+title: infra
+
+#+begin_quote
+a Flux + Terraform infrastructure repo
+#+end_quote
+
+* Todo
+
+- [ ] add Flux for cloudnative-coop repo
+- [ ] get talosconfig
+- [ ] access Kubernetes APIServer
+
+* Prerequisites
+
+Install OpenTofu
+
+#+begin_src shell
+brew install opentofu
+#+end_src
+
+* Usage
+
+plan
+
+#+begin_src shell
+opentofu plan -var equinix_metal_project_id=REPLACE_PROJECT_ID_HERE
+#+end_src
+
+apply
+
+#+begin_src shell
+opentofu apply -var equinix_metal_project_id=REPLACE_PROJECT_ID_HERE
+#+end_src
