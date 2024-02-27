@@ -2,12 +2,19 @@ resource "equinix_metal_device" "cp" {
   count            = var.controlplane_nodes
   hostname         = "${var.cluster_name}-${count.index + 1}"
   plan             = var.plan
-  metro            = "sv"
+  metro            = var.equinix_metal_metro
   operating_system = "custom_ipxe"
   billing_cycle    = "hourly"
   project_id       = var.equinix_metal_project_id
   ipxe_script_url  = var.ipxe_script_url
   always_pxe       = "false"
+}
+
+resource "equinix_metal_reserved_ip_block" "cluster_virtual_ip" {
+  project_id = var.equinix_metal_project_id
+  type       = "public_ipv4"
+  metro      = var.equinix_metal_metro
+  quantity   = 1
 }
 
 resource "talos_machine_secrets" "machine_secrets" {
@@ -32,7 +39,7 @@ resource "talos_machine_configuration_apply" "cp" {
            - interface: eth0
              dhcp: true
              vip:
-               ip: ${var.virtual_ip}
+               ip: ${equinix_metal_reserved_ip_block.cluster_virtual_ip.network}
        install:
          disk: /dev/sda
     EOT
@@ -44,7 +51,7 @@ resource "talos_machine_configuration_apply" "cp" {
            - interface: eth0
              dhcp: true
              vip:
-               ip: ${var.virtual_ip}
+               ip: ${equinix_metal_reserved_ip_block.cluster_virtual_ip.network}
        install:
          disk: /dev/sda
     EOT
@@ -53,7 +60,7 @@ resource "talos_machine_configuration_apply" "cp" {
     machine:
        certSANs:
          - k8s.cloudnative.coop
-         - ${var.virtual_ip}
+         - ${equinix_metal_reserved_ip_block.cluster_virtual_ip.network}
        kubelet:
          extraArgs:
            cloud-provider: external
@@ -74,7 +81,7 @@ resource "talos_machine_configuration_apply" "cp" {
            cloud-provider: external
          certSANs:
            - k8s.cloudnative.coop
-           - ${var.virtual_ip}
+           - ${equinix_metal_reserved_ip_block.cluster_virtual_ip.network}
        # Going to try and add this via patch so we can inline the rendered cilium helm template
        inlineManifests:
          - name: cilium

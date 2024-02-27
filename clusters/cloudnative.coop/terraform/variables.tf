@@ -3,6 +3,11 @@ variable "equinix_metal_project_id" {
   type        = string
   default     = ""
 }
+variable "equinix_metal_metro" {
+  description = "the metro for the Equinix Metal resources"
+  type        = string
+  default     = "sv"
+}
 
 variable "controlplane_nodes" {
   description = "the number of controlplane nodes"
@@ -16,17 +21,6 @@ variable "cluster_name" {
   default     = "cloudnative-coop"
 }
 
-variable "virtual_ip" {
-  description = "The Equinix Metal floating IP"
-  type        = string
-  default     = "1.2.3.4"
-}
-
-variable "cluster_endpoint" {
-  description = "The endpoint for the Talos cluster"
-  type        = string
-  default     = "https://cluster.local:6443"
-}
 variable "talos_version" {
   type        = string
   default     = "v1.6.5"
