@@ -35,11 +35,11 @@ tofu apply -var equinix_metal_project_id=REPLACE_PROJECT_ID_HERE
 get talosconfig
 
 #+begin_src shell :results silent
-tofu output -raw talosconfig > ~/.talos/config-cloudnative-coop
+tofu output -raw cloudnative-coop-talosconfig > ~/.talos/config-cloudnative-coop
 #+end_src
 
 get kubeconfig
 
 #+begin_src shell :results silent
-tofu output -raw kubeconfig > ~/.kube/config-cloudnative-coop
+tofu output -raw cloudnative-coop-kubeconfig > ~/.kube/config-cloudnative-coop
 #+end_src
