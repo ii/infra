@@ -1,9 +1,13 @@
-output "talosconfig" {
+output "cloudnative-coop-talosconfig" {
   value     = module.cloudnative-coop.talosconfig
   sensitive = true
 }
 
-output "kubeconfig" {
+output "cloudnative-coop-kubeconfig" {
   value     = module.cloudnative-coop.kubeconfig
   sensitive = true
+}
+
+output "cloudnative-coop-cluster-virtual-ip" {
+  value = module.cloudnative-coop.cluster_virtual_ip
 }

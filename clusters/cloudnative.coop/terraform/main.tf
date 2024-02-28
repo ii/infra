@@ -61,6 +61,10 @@ resource "talos_machine_configuration_apply" "cp" {
        kubelet:
          extraArgs:
            cloud-provider: external
+       features:
+         kubePrism:
+           enabled: true
+           port: 7445
     cluster:
        allowSchedulingOnMasters: true
        # The rest of this is for cilium
@@ -85,7 +89,6 @@ resource "talos_machine_configuration_apply" "cp" {
            - ${equinix_metal_reserved_ip_block.cluster_virtual_ip.network}
        # Going to try and add this via patch so we can inline the rendered cilium helm template
        inlineManifests:
-         - name: cilium
          - name: cpem-secret
            contents: |
              apiVersion: v1
@@ -96,12 +99,21 @@ resource "talos_machine_configuration_apply" "cp" {
              metadata:
                name: metal-cloud-config
                namespace: kube-system
+         - name: kube-system-namespace-podsecurity
+           contents: |
+             apiVersion: v1
+             kind: Namespace
+             metadata:
+               name: kube-system
+               labels:
+                 pod-security.kubernetes.io/enforce: privileged
+         - name: cilium
     EOT
     ,
     yamlencode([
       {
         "op" : "replace",
-        "path" : "/cluster/inlineManifests/0/contents",
+        "path" : "/cluster/inlineManifests/2/contents",
         "value" : data.helm_template.cilium.manifest
       }
     ])
