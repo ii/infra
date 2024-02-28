@@ -1,6 +1,7 @@
 module "cloudnative-coop" {
-  source = "./clusters/cloudnative.coop/terraform"
+  source = "./terraform/equinix-metal-talos-cluster"
 
+  cluster_name             = "cloudnative-coop"
   equinix_metal_project_id = var.equinix_metal_project_id
   equinix_metal_metro      = "sv"
   equinix_metal_auth_token = var.equinix_metal_auth_token

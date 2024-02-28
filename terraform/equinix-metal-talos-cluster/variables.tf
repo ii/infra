@@ -33,7 +33,7 @@ variable "controlplane_nodes" {
 variable "cluster_name" {
   description = "A name to provide for the Talos cluster"
   type        = string
-  default     = "cloudnative-coop"
+  default     = "a-very-cool-cluster"
 }
 
 variable "talos_version" {
