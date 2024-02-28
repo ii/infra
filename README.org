@@ -29,7 +29,7 @@ tofu destroy -var equinix_metal_project_id=$METAL_PROJECT_ID -var equinix_metal_
 apply
 
 #+begin_src shell
-tofu apply -var equinix_metal_project_id=REPLACE_PROJECT_ID_HERE
+tofu apply -var equinix_metal_project_id=$METAL_PROJECT_ID -var equinix_metal_auth_token=$METAL_AUTH_TOKEN
 #+end_src
 
 get talosconfig
@@ -42,4 +42,16 @@ get kubeconfig
 
 #+begin_src shell :results silent
 tofu output -raw cloudnative-coop-kubeconfig > ~/.kube/config-cloudnative-coop
+#+end_src
+
+* Flux usage
+
+#+begin_src shell :results silent
+flux \
+    --kubeconfig ~/.kube/config-cloudnative-coop \
+    bootstrap \
+    git \
+    --url=ssh://git@github.com/ii/infra.git \
+    --path=clusters/cloudnative.coop \
+    --components-extra=image-reflector-controller,image-automation-controller
 #+end_src
