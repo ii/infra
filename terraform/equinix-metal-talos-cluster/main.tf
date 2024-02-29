@@ -89,7 +89,7 @@ resource "talos_machine_configuration_apply" "cp" {
              apiVersion: v1
              stringData:
                cloud-sa.json: |
-                 {"apiKey":"${var.equinix_metal_auth_token}","projectID":"${var.equinix_metal_project_id}","eipTag":"","eipHealthCheckUseHostIP":true,"loadBalancer":"emlb://sv"}
+                 {"apiKey":"${var.equinix_metal_auth_token}","projectID":"${var.equinix_metal_project_id}","metro":"${var.equinix_metal_metro}","eipTag":"","eipHealthCheckUseHostIP":true,"loadBalancer":"emlb://${var.equinix_metal_metro}"}
              kind: Secret
              metadata:
                name: metal-cloud-config
