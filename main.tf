@@ -7,8 +7,9 @@ module "cloudnative-coop" {
   equinix_metal_auth_token = var.equinix_metal_auth_token
   talos_version            = "v1.6.5"
   kubernetes_version       = "v1.29.2"
-  ipxe_script_url          = "https://pxe.factory.talos.dev/pxe/376567988ad370138ad8b2698212367b8edcb69b5fd68c80be1f2ec7d603b4ba/v1.6.5/metal-amd64"
-  kube_apiserver_domain    = "k8s.cloudnative.coop"
+  ipxe_script_url          = "https://pxe.factory.talos.dev/pxe/3c34c887de9c7013d7b382f3796d7465d7a5f54b2757e1a50d663ed7a303385d/v1.6.5/metal-amd64"
+  kube_apiserver_domain    = "k8s.sharing.io"
+  controlplane_nodes       = 3
 
   providers = {
     talos   = talos
