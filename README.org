@@ -46,6 +46,8 @@ tofu output -raw cloudnative-coop-kubeconfig > ~/.kube/config-cloudnative-coop
 
 * Flux usage
 
+bootstrap a cluster
+
 #+begin_src shell :results silent
 flux \
     --kubeconfig ~/.kube/config-cloudnative-coop \
@@ -54,4 +56,10 @@ flux \
     --url=ssh://git@github.com/ii/infra.git \
     --path=clusters/cloudnative.coop \
     --components-extra=image-reflector-controller,image-automation-controller
+#+end_src
+
+force a reconciliation
+
+#+begin_src shell :results silent
+flux --kubeconfig ~/.kube/config-cloudnative-coop reconcile source git flux-system
 #+end_src
