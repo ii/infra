@@ -6,9 +6,10 @@ a Flux + Terraform infrastructure repo
 
 * Todo
 
-- [ ] add Flux for cloudnative-coop repo
-- [ ] get talosconfig
+- [x] add Flux for cloudnative-coop repo
+- [x] get talosconfig
 - [ ] access Kubernetes APIServer
+- [ ] verify Ceph disk allocation
 
 * Prerequisites
 
@@ -63,3 +64,7 @@ force a reconciliation
 #+begin_src shell :results silent
 flux --kubeconfig ~/.kube/config-cloudnative-coop reconcile source git flux-system
 #+end_src
+
+* Notes
+
+- Equinix Metal Cloud Provider 401 error regarding IP allocation and assigning

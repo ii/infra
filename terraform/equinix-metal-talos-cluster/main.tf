@@ -6,6 +6,7 @@ resource "random_string" "random" {
   upper   = false
   numeric = false
 }
+
 resource "equinix_metal_device" "cp" {
   for_each         = { for idx, val in random_string.random : idx => val }
   hostname         = "${var.cluster_name}-${each.value.result}"
@@ -23,6 +24,8 @@ resource "equinix_metal_reserved_ip_block" "cluster_virtual_ip" {
   type       = "public_ipv4"
   metro      = var.equinix_metal_metro
   quantity   = 1
+
+  tags = ["eip-apiserver-${var.cluster_name}"]
 }
 
 resource "talos_machine_secrets" "machine_secrets" {
@@ -89,7 +92,7 @@ resource "talos_machine_configuration_apply" "cp" {
              apiVersion: v1
              stringData:
                cloud-sa.json: |
-                 {"apiKey":"${var.equinix_metal_auth_token}","projectID":"${var.equinix_metal_project_id}","metro":"${var.equinix_metal_metro}","eipTag":"","eipHealthCheckUseHostIP":true,"loadBalancer":"emlb:///${var.equinix_metal_metro}"}
+                 {"apiKey":"${var.equinix_metal_auth_token}","projectID":"${var.equinix_metal_project_id}","metro":"${var.equinix_metal_metro}","eipTag":"eip-apiserver-${var.cluster_name}","eipHealthCheckUseHostIP":true,"loadBalancer":"emlb:///${var.equinix_metal_metro}"}
              kind: Secret
              metadata:
                name: metal-cloud-config
