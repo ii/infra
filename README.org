@@ -21,28 +21,47 @@ brew install opentofu
 
 * Usage
 
+vars:
+
+- rfc2136_server
+- rfc2136_tsig_keyname
+- rfc2136_tsig_key
+- equinix_metal_project_id
+- equinix_metal_auth_token (DO NOT WRITE THIS DISK)
+
+keep in values.tfvars (as HCL); example:
+
+#+begin_src hcl :tangle ./values-example.tfvars
+rfc2136_server       = "123.253.176.253"
+rfc2136_tsig_keyname = "sharing.io."
+rfc2136_tsig_key     = "[VALUE HERE]"
+equinix_metal_project_id = "82b5c425-8dd4-429e-ae0d-d32f265c63e4"
+#+end_src
+
 plan
 
 #+begin_src shell
-tofu destroy -var equinix_metal_project_id=$METAL_PROJECT_ID -var equinix_metal_auth_token=$METAL_AUTH_TOKEN
+tofu plan -var-file=./values.tfvars -var equinix_metal_auth_token=$METAL_AUTH_TOKEN
 #+end_src
 
 apply
 
 #+begin_src shell
-tofu apply -var equinix_metal_project_id=$METAL_PROJECT_ID -var equinix_metal_auth_token=$METAL_AUTH_TOKEN
+tofu apply -var-file=./values.tfvars -var equinix_metal_auth_token=$METAL_AUTH_TOKEN
 #+end_src
 
 get talosconfig
 
 #+begin_src shell :results silent
-tofu output -raw cloudnative-coop-talosconfig > ~/.talos/config-cloudnative-coop
+CLUSTER_NAME=cloudnative-coop
+tofu output -raw "$CLUSTER_NAME"-talosconfig > ~/.talos/config-"$CLUSTER_NAME"
 #+end_src
 
 get kubeconfig
 
 #+begin_src shell :results silent
-tofu output -raw cloudnative-coop-kubeconfig > ~/.kube/config-cloudnative-coop
+CLUSTER_NAME=cloudnative-coop
+tofu output -raw "$CLUSTER_NAME"-kubeconfig > ~/.kube/config-"$CLUSTER_NAME"
 #+end_src
 
 * Flux usage
@@ -51,7 +70,7 @@ bootstrap a cluster
 
 #+begin_src shell :results silent
 KUBECONFIG=~/.kube/config-cloudnative-coop
-CLUSTER=PATH=clusters/cloudnative.coop
+CLUSTER_PATH=clusters/cloudnative.coop
 flux \
     --kubeconfig "$KUBECONFIG" \
     bootstrap \
