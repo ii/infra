@@ -28,6 +28,12 @@ resource "equinix_metal_reserved_ip_block" "cluster_virtual_ip" {
   tags = ["eip-apiserver-${var.cluster_name}"]
 }
 
+# NOTE CCM must manage this. This is an unstable/unreliable hack
+resource "equinix_metal_ip_attachment" "assign_first_cp_node" {
+  device_id     = { for idx, val in equinix_metal_device.cp : idx => val }[0].id
+  cidr_notation = join("/", [cidrhost(equinix_metal_reserved_ip_block.cluster_virtual_ip.cidr_notation, 0), "32"])
+}
+
 resource "talos_machine_secrets" "machine_secrets" {
   talos_version = var.talos_version
 }
@@ -92,7 +98,7 @@ resource "talos_machine_configuration_apply" "cp" {
              apiVersion: v1
              stringData:
                cloud-sa.json: |
-                 {"apiKey":"${var.equinix_metal_auth_token}","projectID":"${var.equinix_metal_project_id}","metro":"${var.equinix_metal_metro}","eipTag":"eip-apiserver-${var.cluster_name}","eipHealthCheckUseHostIP":true,"loadBalancer":"emlb:///${var.equinix_metal_metro}"}
+                 {"apiKey":"${var.equinix_metal_auth_token}","projectID":"${var.equinix_metal_project_id}","metro":"${var.equinix_metal_metro}","eipTag":"eip-apiserver-${var.cluster_name}","eipHealthCheckUseHostIP":true,"loadBalancer":""}
              kind: Secret
              metadata:
                name: metal-cloud-config
