@@ -50,12 +50,14 @@ tofu output -raw cloudnative-coop-kubeconfig > ~/.kube/config-cloudnative-coop
 bootstrap a cluster
 
 #+begin_src shell :results silent
+KUBECONFIG=~/.kube/config-cloudnative-coop
+CLUSTER=PATH=clusters/cloudnative.coop
 flux \
-    --kubeconfig ~/.kube/config-cloudnative-coop \
+    --kubeconfig "$KUBECONFIG" \
     bootstrap \
     git \
     --url=ssh://git@github.com/ii/infra.git \
-    --path=clusters/cloudnative.coop \
+    --path="$CLUSTER_PATH" \
     --components-extra=image-reflector-controller,image-automation-controller
 #+end_src
 
