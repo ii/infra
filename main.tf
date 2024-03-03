@@ -17,6 +17,19 @@ module "cloudnative-coop" {
     equinix = equinix
   }
 }
+module "cloudnative-coop-record" {
+  source = "./terraform/rfc2136-record-assign"
+
+  zone      = "sharing.io."
+  name      = "k8s"
+  addresses = [module.cloudnative-coop.cluster_virtual_ip]
+
+  providers = {
+    dns = dns
+  }
+
+  depends_on = [module.cloudnative-coop]
+}
 
 module "sharing-io" {
   source = "./terraform/equinix-metal-talos-cluster"
