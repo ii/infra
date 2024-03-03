@@ -61,7 +61,7 @@ data "helm_template" "cilium" {
         enabled: false
       hostRoot: /sys/fs/cgroup
     k8sServiceHost: localhost
-    k8sServicePort: 7443
+    k8sServicePort: 7445
     EOT
   ]
 }
