@@ -37,7 +37,7 @@ data "helm_template" "cilium" {
     <<-EOT
     ipam:
       mode: kubernetes
-    kubeProxyReplacement: "true"
+    kubeProxyReplacement: strict
     securityContext:
       capabilities:
         ciliumAgent:
