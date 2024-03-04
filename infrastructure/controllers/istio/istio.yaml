@@ -60,7 +60,8 @@ spec:
             cpu: 10m
             memory: 16Mi
     pilot:
-      autoscaleEnabled: false
+      autoscaleEnabled: true
+      autoscaleMin: 3
       resources:
         requests:
           cpu: 100m
@@ -88,10 +89,15 @@ spec:
   interval: 1h0m0s
   values:
     autoscaling:
-      enabled: false
+      enabled: true
+      minReplicas: 3
     resources:
       requests:
         cpu: 10m
         memory: 128Mi
     service:
       type: LoadBalancer
+      externalTrafficPolicy: Local
+      # externalIPs: []
+      # loadBalancerIP: ""
+      # eval from configmap
