@@ -34,7 +34,7 @@ provider "helm" {
 provider "equinix" {
   alias = "equinix"
   # Configuration options
-  # to use: export METAL_AUTH_TOKEN
+  token = var.equinix_metal_auth_token
 }
 provider "dns" {
   update {
