@@ -27,3 +27,21 @@ variable "rfc2136_tsig_key" {
   type        = string
   default     = ""
 }
+
+variable "github_token" {
+  sensitive   = true
+  type        = string
+  description = "a PAT for GitHub auth"
+}
+
+variable "github_org" {
+  type        = string
+  description = "the org for the Flux repo (ii)"
+  default     = "ii"
+}
+
+variable "github_repository" {
+  type        = string
+  description = "the Flux repo name (infra)"
+  default     = "infra"
+}

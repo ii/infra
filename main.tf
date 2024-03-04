@@ -30,3 +30,15 @@ module "sharing-io-record" {
 
   depends_on = [module.sharing-io]
 }
+module "sharing-io-flux-bootstrap" {
+  source = "./terraform/flux-bootstrap"
+
+  github_org        = var.github_org
+  github_repository = var.github_repository
+  cluster_name      = "sharing.io"
+  kubeconfig        = module.sharing-io.kubeconfig
+
+  providers = {
+    github = github
+  }
+}

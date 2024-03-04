@@ -16,6 +16,14 @@ terraform {
       source  = "hashicorp/dns"
       version = "3.4.0"
     }
+    flux = {
+      source  = "fluxcd/flux"
+      version = "1.2.3"
+    }
+    github = {
+      source  = "integrations/github"
+      version = "6.0.0"
+    }
   }
   backend "kubernetes" {
     secret_suffix = "state"
@@ -35,6 +43,10 @@ provider "equinix" {
   alias = "equinix"
   # Configuration options
   token = var.equinix_metal_auth_token
+}
+provider "github" {
+  owner = var.github_org
+  token = var.github_token
 }
 provider "dns" {
   update {

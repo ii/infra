@@ -6,7 +6,7 @@ a Flux + Terraform infrastructure repo
 
 * Todo
 
-- [x] add Flux for cloudnative-coop repo
+- [x] add Flux for sharing-io repo
 - [x] get talosconfig
 - [ ] access Kubernetes APIServer
 - [ ] verify Ceph disk allocation
@@ -38,52 +38,44 @@ rfc2136_tsig_key     = "[VALUE HERE]"
 equinix_metal_project_id = "82b5c425-8dd4-429e-ae0d-d32f265c63e4"
 #+end_src
 
+init
+
+#+begin_src shell
+tofu init -var-file=./values.tfvars -var equinix_metal_auth_token=$METAL_AUTH_TOKEN -var github_token="$(gh auth token)"
+#+end_src
+
 plan
 
 #+begin_src shell
-tofu plan -var-file=./values.tfvars -var equinix_metal_auth_token=$METAL_AUTH_TOKEN
+tofu plan -var-file=./values.tfvars -var equinix_metal_auth_token=$METAL_AUTH_TOKEN -var github_token="$(gh auth token)"
 #+end_src
 
 apply
 
 #+begin_src shell
-tofu apply -var-file=./values.tfvars -var equinix_metal_auth_token=$METAL_AUTH_TOKEN
+tofu apply -var-file=./values.tfvars -var equinix_metal_auth_token=$METAL_AUTH_TOKEN -var github_token="$(gh auth token)"
 #+end_src
 
 get talosconfig
 
 #+begin_src shell :results silent
-CLUSTER_NAME=cloudnative-coop
+CLUSTER_NAME=sharing-io
 tofu output -raw "$CLUSTER_NAME"-talosconfig > ~/.talos/config-"$CLUSTER_NAME"
 #+end_src
 
 get kubeconfig
 
 #+begin_src shell :results silent
-CLUSTER_NAME=cloudnative-coop
+CLUSTER_NAME=sharing-io
 tofu output -raw "$CLUSTER_NAME"-kubeconfig > ~/.kube/config-"$CLUSTER_NAME"
 #+end_src
 
 * Flux usage
 
-bootstrap a cluster
-
-#+begin_src shell :results silent
-KUBECONFIG=~/.kube/config-cloudnative-coop
-CLUSTER_PATH=clusters/cloudnative.coop
-flux \
-    --kubeconfig "$KUBECONFIG" \
-    bootstrap \
-    git \
-    --url=ssh://git@github.com/ii/infra.git \
-    --path="$CLUSTER_PATH" \
-    --components-extra=image-reflector-controller,image-automation-controller
-#+end_src
-
 force a reconciliation
 
 #+begin_src shell :results silent
-flux --kubeconfig ~/.kube/config-cloudnative-coop reconcile source git flux-system
+flux --kubeconfig ~/.kube/config-sharing-io reconcile source git flux-system
 #+end_src
 
 * Notes
