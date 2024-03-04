@@ -48,6 +48,9 @@ resource "talos_machine_configuration_apply" "cp" {
     <<-EOT
     machine:
        kubelet:
+         nodeIP:
+           validSubnets:
+             - ${each.value.network.0.address}/32
          extraArgs:
            cloud-provider: external
        network:
