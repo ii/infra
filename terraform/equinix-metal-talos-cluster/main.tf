@@ -56,11 +56,6 @@ resource "talos_machine_configuration_apply" "cp" {
            - interface: lo
              addresses:
                - ${equinix_metal_reserved_ip_block.cluster_virtual_ip.network}
-           - interface: eth0
-             vip:
-               ip: ${equinix_metal_reserved_ip_block.cluster_virtual_ip.network}
-               equinixMetal:
-                 apiToken: ${var.equinix_metal_auth_token}
        install:
          disk: /dev/sda
     EOT
@@ -88,8 +83,6 @@ resource "talos_machine_configuration_apply" "cp" {
            name: none
        externalCloudProvider:
          enabled: true
-         manifests:
-           - https://github.com/equinix/cloud-provider-equinix-metal/releases/download/${var.equinix_metal_cloudprovider_controller_version}/deployment.yaml
        controllerManager:
          extraArgs:
            cloud-provider: external
@@ -101,16 +94,6 @@ resource "talos_machine_configuration_apply" "cp" {
            - ${equinix_metal_reserved_ip_block.cluster_virtual_ip.network}
        # Going to try and add this via patch so we can inline the rendered cilium helm template
        inlineManifests:
-         - name: cpem-secret
-           contents: |
-             apiVersion: v1
-             stringData:
-               cloud-sa.json: |
-                 {"apiKey":"${var.equinix_metal_auth_token}","projectID":"${var.equinix_metal_project_id}","metro":"${var.equinix_metal_metro}","eipTag":"eip-apiserver-${var.cluster_name}","eipHealthCheckUseHostIP":true,"loadBalancer":""}
-             kind: Secret
-             metadata:
-               name: metal-cloud-config
-               namespace: kube-system
          - name: kube-system-namespace-podsecurity
            contents: |
              apiVersion: v1
@@ -125,7 +108,7 @@ resource "talos_machine_configuration_apply" "cp" {
     yamlencode([
       {
         "op" : "replace",
-        "path" : "/cluster/inlineManifests/2/contents",
+        "path" : "/cluster/inlineManifests/1/contents",
         "value" : data.helm_template.cilium.manifest
       }
     ])
