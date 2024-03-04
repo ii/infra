@@ -66,6 +66,18 @@ spec:
         requests:
           cpu: 100m
           memory: 128Mi
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 1
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - istiod
+                topologyKey: "kubernetes.io/hostname"
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
@@ -110,3 +122,15 @@ spec:
       # externalIPs: []
       # loadBalancerIP: ""
       # eval from configmap
+    affinity:
+      podAntiAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - istio-gateway
+              topologyKey: "kubernetes.io/hostname"
