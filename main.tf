@@ -5,39 +5,6 @@ locals {
   metro              = "sv"
 }
 
-module "cloudnative-coop" {
-  source = "./terraform/equinix-metal-talos-cluster"
-
-  cluster_name             = "cloudnative-coop"
-  kube_apiserver_domain    = "k8s.sharing.io"
-  equinix_metal_project_id = var.equinix_metal_project_id
-  equinix_metal_metro      = local.metro
-  equinix_metal_auth_token = var.equinix_metal_auth_token
-  talos_version            = local.talos_version
-  kubernetes_version       = local.kubernetes_version
-  ipxe_script_url          = local.ipxe_script_url
-  controlplane_nodes       = 3
-
-  providers = {
-    talos   = talos
-    helm    = helm
-    equinix = equinix
-  }
-}
-module "cloudnative-coop-record" {
-  source = "./terraform/rfc2136-record-assign"
-
-  zone      = "sharing.io."
-  name      = "k8s"
-  addresses = [module.cloudnative-coop.cluster_virtual_ip]
-
-  providers = {
-    dns = dns
-  }
-
-  depends_on = [module.cloudnative-coop]
-}
-
 module "sharing-io" {
   source = "./terraform/equinix-metal-talos-cluster"
 
