@@ -79,11 +79,12 @@ resource "talos_machine_configuration_apply" "cp" {
        allowSchedulingOnMasters: true
        externalCloudProvider:
          enabled: true
+       apiServer:
          certSANs:
            - ${var.kube_apiserver_domain}
            - ${equinix_metal_reserved_ip_block.cluster_virtual_ip.network}
        inlineManifests:
-         - name: kube-system-namespace-podsecurity
+         - name: ns-kube-system-namespace-podsecurity
            contents: |
              apiVersion: v1
              kind: Namespace
@@ -91,15 +92,21 @@ resource "talos_machine_configuration_apply" "cp" {
                name: kube-system
                labels:
                  pod-security.kubernetes.io/enforce: privileged
+         - name: ns-flux-system
+           contents: |
+             apiVersion: v1
+             kind: Namespace
+             metadata:
+               name: flux-system
          - name: ingress-ip
            contents: |
              apiVersion: v1
              kind: ConfigMap
              metadata:
-               name: ingress-ip
-               namespace: kube-system
+               name: ingressip
+               namespace: flux-system
              data:
-               ingress-ip: ${ { for idx, val in equinix_metal_device.cp : idx => val }[0].network.0.address} }
+               ingressip: ${ { for idx, val in equinix_metal_device.cp : idx => val }[0].network.0.address}
     EOT
   ]
 }
