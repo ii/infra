@@ -47,6 +47,10 @@ resource "talos_machine_secrets" "machine_secrets" {
   talos_version = var.talos_version
 }
 
+# NOTE
+#       anonymous-auth is set to true for the APIServer.
+#       this must be removed after a future update to the Equinix Metal Cloud Provider controller.
+
 resource "talos_machine_configuration_apply" "cp" {
   for_each                    = { for idx, val in equinix_metal_device.cp : idx => val }
   endpoint                    = each.value.network.0.address
@@ -103,6 +107,7 @@ resource "talos_machine_configuration_apply" "cp" {
        apiServer:
          extraArgs:
            cloud-provider: external
+           anonymous-auth: true
          certSANs:
            - ${var.kube_apiserver_domain}
            - ${equinix_metal_reserved_ip_block.cluster_virtual_ip.network}
