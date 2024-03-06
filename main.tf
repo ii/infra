@@ -1,5 +1,5 @@
 module "sharing-io" {
-  source = "./terraform/equinix-metal-talos-cluster"
+  source = "./terraform/equinix-metal-talos-cluster-with-ccm"
 
   cluster_name             = "sharing-io"
   kube_apiserver_domain    = "sharingio.sharing.io"
@@ -56,49 +56,3 @@ module "sharing-io-flux-bootstrap" {
   }
 }
 
-
-##### test with CCM
-module "test-sharing-io" {
-  source = "./terraform/equinix-metal-talos-cluster-with-ccm"
-
-  cluster_name             = "test-sharing-io"
-  kube_apiserver_domain    = "test-sharingio.sharing.io"
-  equinix_metal_project_id = var.equinix_metal_project_id
-  equinix_metal_metro      = local.metro
-  equinix_metal_auth_token = var.equinix_metal_auth_token
-  talos_version            = local.talos_version
-  kubernetes_version       = local.kubernetes_version
-  ipxe_script_url          = local.ipxe_script_url
-  controlplane_nodes       = 3
-
-  providers = {
-    talos   = talos
-    helm    = helm
-    equinix = equinix
-  }
-}
-module "test-sharing-io-record" {
-  source = "./terraform/rfc2136-record-assign"
-
-  zone      = "sharing.io."
-  name      = "test-sharingio"
-  addresses = [module.test-sharing-io.cluster_virtual_ip]
-
-  providers = {
-    dns = dns
-  }
-
-  depends_on = [module.test-sharing-io]
-}
-module "test-sharing-io-flux-bootstrap" {
-  source = "./terraform/flux-bootstrap"
-
-  github_org        = var.github_org
-  github_repository = var.github_repository
-  cluster_name      = "test-sharing.io"
-  kubeconfig        = module.sharing-io.kubeconfig
-
-  providers = {
-    github = github
-  }
-}
