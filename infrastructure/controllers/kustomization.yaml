@@ -5,5 +5,4 @@ resources:
   - ./00-namespaces.yaml
   - ./rook-ceph
   - ./cert-manager
-  - ./istio
   - ./metallb
