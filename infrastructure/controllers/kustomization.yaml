@@ -6,4 +6,3 @@ resources:
   - ./ingress-nginx.yaml
   - ./rook-ceph
   - ./cert-manager
-  - ./metallb
