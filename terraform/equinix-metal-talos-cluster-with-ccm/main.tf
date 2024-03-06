@@ -93,11 +93,6 @@ resource "talos_machine_configuration_apply" "cp" {
        allowSchedulingOnMasters: true
        # The rest of this is for cilium
        #  https://www.talos.dev/v1.3/kubernetes-guides/network/deploying-cilium/
-       proxy:
-         disabled: true
-       network:
-         cni:
-           name: none
        externalCloudProvider:
          enabled: true
          manifests:
@@ -108,7 +103,6 @@ resource "talos_machine_configuration_apply" "cp" {
        apiServer:
          extraArgs:
            cloud-provider: external
-       apiServer:
          certSANs:
            - ${var.kube_apiserver_domain}
            - ${equinix_metal_reserved_ip_block.cluster_virtual_ip.network}
@@ -146,12 +140,6 @@ resource "talos_machine_configuration_apply" "cp" {
                namespace: flux-system
              data:
                ingressip: ${equinix_metal_reserved_ip_block.cluster_ingress_ip.network}
-         - name: ns-flux-system
-           contents: |
-             apiVersion: v1
-             kind: Namespace
-             metadata:
-               name: flux-system
     EOT
   ]
 }
