@@ -77,3 +77,16 @@ module "test-sharing-io" {
     equinix = equinix
   }
 }
+module "test-sharing-io-record" {
+  source = "./terraform/rfc2136-record-assign"
+
+  zone      = "sharing.io."
+  name      = "test-sharingio"
+  addresses = [module.test-sharing-io.cluster_virtual_ip]
+
+  providers = {
+    dns = dns
+  }
+
+  depends_on = [module.test-sharing-io]
+}
