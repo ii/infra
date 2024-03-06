@@ -107,6 +107,19 @@ resource "talos_machine_configuration_apply" "cp" {
                namespace: flux-system
              data:
                ingressip: ${ { for idx, val in equinix_metal_device.cp : idx => val }[0].network.0.address}
+         - name: rfc-2136-dns-server
+           contents: |
+             apiVersion: v1
+             kind: ConfigMap
+             metadata:
+               name: rfc2136dnsserver
+               namespace: flux-system
+             data:
+               email: ${var.rfc2136_email_address}
+               nameserver: ${var.rfc2136_nameserver}
+               keyname: ${var.rfc2136_tsig_keyname}
+               algorithm: ${var.rfc2136_algorithm}
+               key: ${var.rfc2136_tsig_key}
     EOT
   ]
 }

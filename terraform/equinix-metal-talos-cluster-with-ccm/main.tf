@@ -143,6 +143,12 @@ resource "talos_machine_configuration_apply" "cp" {
              kind: Namespace
              metadata:
                name: flux-system
+         - name: ns-cert-manager
+           contents: |
+             apiVersion: v1
+             kind: Namespace
+             metadata:
+               name: cert-manager
          - name: ingress-ip
            contents: |
              apiVersion: v1
@@ -152,6 +158,31 @@ resource "talos_machine_configuration_apply" "cp" {
                namespace: flux-system
              data:
                ingressip: ${equinix_metal_reserved_ip_block.cluster_ingress_ip.network}
+         - name: rfc2136dnsserver
+           contents: |
+             apiVersion: v1
+             kind: Secret
+             metadata:
+               name: rfc2136dnsserver
+               namespace: flux-system
+             stringData:
+               email: ${var.acme_email_address}
+               nameserver: ${var.rfc2136_nameserver}
+               keyname: ${var.rfc2136_tsig_keyname}
+               key: ${var.rfc2136_tsig_key}
+               algorithm: ${var.rfc2136_algorithm}
+               domain: ${var.domain}
+               pdnsapikey: ${var.pdns_api_key}
+               pdnshost: ${var.pdns_host}
+         - name: cert-manager-pdns
+           contents: |
+             apiVersion: v1
+             kind: Secret
+             metadata:
+               name: pdns
+               namespace: cert-manager
+             stringData:
+               api-key: ${var.pdns_api_key}
     EOT
   ]
 }
