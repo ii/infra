@@ -137,6 +137,21 @@ resource "talos_machine_configuration_apply" "cp" {
              kind: Namespace
              metadata:
                name: flux-system
+         - name: ingress-ip
+           contents: |
+             apiVersion: v1
+             kind: ConfigMap
+             metadata:
+               name: ingressip
+               namespace: flux-system
+             data:
+               ingressip: ${equinix_metal_reserved_ip_block.cluster_ingress_ip.network}
+         - name: ns-flux-system
+           contents: |
+             apiVersion: v1
+             kind: Namespace
+             metadata:
+               name: flux-system
     EOT
   ]
 }
