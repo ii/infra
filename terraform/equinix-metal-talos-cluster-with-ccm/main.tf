@@ -28,6 +28,15 @@ resource "equinix_metal_reserved_ip_block" "cluster_virtual_ip" {
   tags = ["eip-apiserver-${var.cluster_name}"]
 }
 
+resource "equinix_metal_reserved_ip_block" "cluster_ingress_ip" {
+  project_id = var.equinix_metal_project_id
+  type       = "public_ipv4"
+  metro      = var.equinix_metal_metro
+  quantity   = 1
+
+  tags = ["eip-ingress-${var.cluster_name}"]
+}
+
 # NOTE CCM must manage this. This is an unstable/unreliable hack
 resource "equinix_metal_ip_attachment" "assign_first_cp_node" {
   device_id     = { for idx, val in equinix_metal_device.cp : idx => val }[0].id
