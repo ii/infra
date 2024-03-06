@@ -6,7 +6,7 @@ metadata:
   namespace: flux-system
 spec:
   interval: 10m0s
-  path: ./infrastructure/controllers/nginx-ingress
+  path: ./infrastructure/controllers/ingress-nginx
   prune: true
   wait: true
   sourceRef:
