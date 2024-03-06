@@ -90,3 +90,15 @@ module "test-sharing-io-record" {
 
   depends_on = [module.test-sharing-io]
 }
+module "test-sharing-io-flux-bootstrap" {
+  source = "./terraform/flux-bootstrap"
+
+  github_org        = var.github_org
+  github_repository = var.github_repository
+  cluster_name      = "test-sharing.io"
+  kubeconfig        = module.sharing-io.kubeconfig
+
+  providers = {
+    github = github
+  }
+}
