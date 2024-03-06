@@ -21,6 +21,8 @@ resource "github_repository_deploy_key" "this" {
   lifecycle {
     ignore_changes = all
   }
+
+  depends_on = [local_sensitive_file.kubeconfig, tls_private_key.flux]
 }
 
 resource "flux_bootstrap_git" "this" {

@@ -51,8 +51,6 @@ resource "talos_machine_configuration_apply" "cp" {
          nodeIP:
            validSubnets:
              - ${each.value.network.0.address}/32
-         extraArgs:
-           cloud-provider: external
        network:
          hostname: ${each.value.hostname}
          interfaces:
@@ -73,47 +71,18 @@ resource "talos_machine_configuration_apply" "cp" {
        certSANs:
          - ${var.kube_apiserver_domain}
          - ${equinix_metal_reserved_ip_block.cluster_virtual_ip.network}
-       kubelet:
-         extraArgs:
-           cloud-provider: external
        features:
          kubePrism:
            enabled: true
            port: 7445
     cluster:
        allowSchedulingOnMasters: true
-       # The rest of this is for cilium
-       #  https://www.talos.dev/v1.3/kubernetes-guides/network/deploying-cilium/
-       proxy:
-         disabled: true
-       network:
-         cni:
-           name: none
        externalCloudProvider:
          enabled: true
-         manifests:
-           - https://github.com/equinix/cloud-provider-equinix-metal/releases/download/${var.equinix_metal_cloudprovider_controller_version}/deployment.yaml
-       controllerManager:
-         extraArgs:
-           cloud-provider: external
-       apiServer:
-         extraArgs:
-           cloud-provider: external
          certSANs:
            - ${var.kube_apiserver_domain}
            - ${equinix_metal_reserved_ip_block.cluster_virtual_ip.network}
-       # Going to try and add this via patch so we can inline the rendered cilium helm template
        inlineManifests:
-         - name: cpem-secret
-           contents: |
-             apiVersion: v1
-             stringData:
-               cloud-sa.json: |
-                 {"apiKey":"${var.equinix_metal_auth_token}","projectID":"${var.equinix_metal_project_id}","metro":"${var.equinix_metal_metro}","eipTag":"eip-apiserver-${var.cluster_name}","eipHealthCheckUseHostIP":true,"loadBalancer":"metallb:///metallb-system/config"}
-             kind: Secret
-             metadata:
-               name: metal-cloud-config
-               namespace: kube-system
          - name: kube-system-namespace-podsecurity
            contents: |
              apiVersion: v1
@@ -122,16 +91,16 @@ resource "talos_machine_configuration_apply" "cp" {
                name: kube-system
                labels:
                  pod-security.kubernetes.io/enforce: privileged
-         - name: cilium
+         - name: ingress-ip
+           contents: |
+             apiVersion: v1
+             kind: ConfigMap
+             metadata:
+               name: ingress-ip
+               namespace: kube-system
+             data:
+               ingress-ip: ${ { for idx, val in equinix_metal_device.cp : idx => val }[0].network.0.address} }
     EOT
-    ,
-    yamlencode([
-      {
-        "op" : "replace",
-        "path" : "/cluster/inlineManifests/2/contents",
-        "value" : data.helm_template.cilium.manifest
-      }
-    ])
   ]
 }
 
