@@ -19,6 +19,11 @@ resource "equinix_metal_device" "cp" {
   always_pxe       = "false"
 }
 
+resource "equinix_metal_bgp_session" "cp_bgp" {
+  device_id      = { for idx, val in equinix_metal_device.cp : idx => val }[0].id
+  address_family = "ipv4"
+}
+
 resource "equinix_metal_reserved_ip_block" "cluster_virtual_ip" {
   project_id = var.equinix_metal_project_id
   type       = "public_ipv4"
