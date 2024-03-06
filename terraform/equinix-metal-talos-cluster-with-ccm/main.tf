@@ -20,7 +20,8 @@ resource "equinix_metal_device" "cp" {
 }
 
 resource "equinix_metal_bgp_session" "cp_bgp" {
-  device_id      = { for idx, val in equinix_metal_device.cp : idx => val }[0].id
+  for_each       = { for idx, val in equinix_metal_device.cp : idx => val }
+  device_id      = each.value.id
   address_family = "ipv4"
 }
 
