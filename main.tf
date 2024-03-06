@@ -30,6 +30,19 @@ module "sharing-io-record" {
 
   depends_on = [module.sharing-io]
 }
+module "sharing-io-record-ingress-ip" {
+  source = "./terraform/rfc2136-record-assign"
+
+  zone      = "sharing.io."
+  name      = "*"
+  addresses = [module.sharing-io.ingress_ip]
+
+  providers = {
+    dns = dns
+  }
+
+  depends_on = [module.sharing-io]
+}
 module "sharing-io-flux-bootstrap" {
   source = "./terraform/flux-bootstrap"
 
