@@ -55,3 +55,25 @@ module "sharing-io-flux-bootstrap" {
     github = github
   }
 }
+
+
+##### test with CCM
+module "test-sharing-io" {
+  source = "./terraform/equinix-metal-talos-cluster-with-ccm"
+
+  cluster_name             = "test-sharing-io"
+  kube_apiserver_domain    = "test-sharingio.sharing.io"
+  equinix_metal_project_id = var.equinix_metal_project_id
+  equinix_metal_metro      = local.metro
+  equinix_metal_auth_token = var.equinix_metal_auth_token
+  talos_version            = local.talos_version
+  kubernetes_version       = local.kubernetes_version
+  ipxe_script_url          = local.ipxe_script_url
+  controlplane_nodes       = 3
+
+  providers = {
+    talos   = talos
+    helm    = helm
+    equinix = equinix
+  }
+}
