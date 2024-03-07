@@ -78,6 +78,13 @@ force a reconciliation
 flux --kubeconfig ~/.kube/config-sharing-io reconcile source git flux-system
 #+end_src
 
+* Force tear down
+
+#+begin_src shell
+tofu state list | grep -E 'talos|flux' | xargs -I{} tofu state rm {}
+tofu destroy -var-file=./values.tfvars -var equinix_metal_auth_token=$METAL_AUTH_TOKEN -var github_token="$(gh auth token)"
+#+end_src
+
 * Notes
 
 - Equinix Metal Cloud Provider 401 error regarding IP allocation and assigning
