@@ -77,6 +77,11 @@ resource "talos_machine_configuration_apply" "cp" {
                ip: ${equinix_metal_reserved_ip_block.cluster_virtual_ip.network}
                equinixMetal:
                  apiToken: ${var.equinix_metal_auth_token}
+             routes:
+               - network: 169.254.255.1/32
+                 gateway: 10.69.64.134
+               - network: 169.254.255.2/32
+                 gateway: 10.69.64.134
        install:
          disk: /dev/sda
     EOT

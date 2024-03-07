@@ -23,3 +23,8 @@ data "talos_machine_configuration" "controlplane" {
   talos_version      = var.talos_version
   kubernetes_version = var.kubernetes_version
 }
+
+data "equinix_metal_device_bgp_neighbors" "bgp_neighbour" {
+  # NOTE consider including a for_each to iterate and have one for server
+  device_id = { for idx, val in equinix_metal_device.cp : idx => val }[0].id
+}
