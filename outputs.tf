@@ -8,6 +8,10 @@ output "sharing-io-kubeconfig" {
   sensitive = true
 }
 
-output "sharing-io-cluster-virtual-ip" {
-  value = module.sharing-io.cluster_virtual_ip
+output "sharing-io-cluster-apiserver-ip" {
+  value = module.sharing-io.cluster_apiserver_ip
+}
+
+output "sharing-io-cluster-ingress-ip" {
+  value = module.sharing-io.cluster_ingress_ip
 }
