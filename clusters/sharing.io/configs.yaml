@@ -6,7 +6,7 @@ metadata:
   namespace: flux-system
 spec:
   interval: 10m0s
-  path: ./infrastructure/controllers/configs
+  path: ./infrastructure/configs
   dependsOn:
     - name: infrastructure
   prune: true
