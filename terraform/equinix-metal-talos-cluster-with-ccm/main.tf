@@ -72,7 +72,8 @@ resource "talos_machine_configuration_apply" "cp" {
            - interface: lo
              addresses:
                - ${equinix_metal_reserved_ip_block.cluster_virtual_ip.network}
-           - interface: eth0
+           - deviceSelector:
+               busPath: "0*"
              vip:
                ip: ${equinix_metal_reserved_ip_block.cluster_virtual_ip.network}
                equinixMetal:
