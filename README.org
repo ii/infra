@@ -40,32 +40,32 @@ equinix_metal_project_id = "82b5c425-8dd4-429e-ae0d-d32f265c63e4"
 
 init
 
-#+begin_src shell
-tofu init -var-file=./values.tfvars -var equinix_metal_auth_token=$METAL_AUTH_TOKEN -var github_token="$(gh auth token)"
+#+begin_src tmux
+tofu init -var-file=./values.tfvars -var equinix_metal_auth_token=$METAL_AUTH_TOKEN -var github_token="$(gh auth token)" --upgrade
 #+end_src
 
 plan
 
-#+begin_src shell
+#+begin_src tmux
 tofu plan -var-file=./values.tfvars -var equinix_metal_auth_token=$METAL_AUTH_TOKEN -var github_token="$(gh auth token)"
 #+end_src
 
 apply
 
-#+begin_src shell
+#+begin_src tmux
 tofu apply -var-file=./values.tfvars -var equinix_metal_auth_token=$METAL_AUTH_TOKEN -var github_token="$(gh auth token)"
 #+end_src
 
 get talosconfig
 
-#+begin_src shell :results silent
+#+begin_src tmux
 CLUSTER_NAME=sharing-io
 tofu output -raw "$CLUSTER_NAME"-talosconfig > ~/.talos/config-"$CLUSTER_NAME"
 #+end_src
 
 get kubeconfig
 
-#+begin_src shell :results silent
+#+begin_src tmux
 CLUSTER_NAME=sharing-io
 tofu output -raw "$CLUSTER_NAME"-kubeconfig > ~/.kube/config-"$CLUSTER_NAME"
 #+end_src
@@ -80,7 +80,7 @@ flux --kubeconfig ~/.kube/config-sharing-io reconcile source git flux-system
 
 * Force tear down
 
-#+begin_src shell
+#+begin_src tmux
 tofu state list | grep -E 'talos|flux' | xargs -I{} tofu state rm {}
 tofu destroy -var-file=./values.tfvars -var equinix_metal_auth_token=$METAL_AUTH_TOKEN -var github_token="$(gh auth token)"
 #+end_src
