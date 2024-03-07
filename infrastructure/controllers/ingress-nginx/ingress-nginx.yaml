@@ -27,4 +27,4 @@ spec:
     controller:
       service:
         externalIPs:
-          - 145.40.90.158
+          - "${ingressip}"
