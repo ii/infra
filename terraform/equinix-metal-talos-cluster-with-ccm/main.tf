@@ -25,13 +25,12 @@ resource "equinix_metal_bgp_session" "cp_bgp" {
   address_family = "ipv4"
 }
 
-resource "equinix_metal_reserved_ip_block" "cluster_virtual_ip" {
+resource "equinix_metal_reserved_ip_block" "cluster_apiserver_ip" {
   project_id = var.equinix_metal_project_id
   type       = "public_ipv4"
   metro      = var.equinix_metal_metro
   quantity   = 1
-
-  tags = ["eip-apiserver-${var.cluster_name}"]
+  tags       = ["eip-apiserver-${var.cluster_name}"]
 }
 
 resource "equinix_metal_reserved_ip_block" "cluster_ingress_ip" {
@@ -39,8 +38,7 @@ resource "equinix_metal_reserved_ip_block" "cluster_ingress_ip" {
   type       = "public_ipv4"
   metro      = var.equinix_metal_metro
   quantity   = 1
-
-  tags = ["eip-ingress-${var.cluster_name}"]
+  tags       = ["eip-ingress-${var.cluster_name}"]
 }
 
 resource "talos_machine_secrets" "machine_secrets" {
@@ -71,18 +69,19 @@ resource "talos_machine_configuration_apply" "cp" {
          interfaces:
            - interface: lo
              addresses:
-               - ${equinix_metal_reserved_ip_block.cluster_virtual_ip.network}
+               - ${equinix_metal_reserved_ip_block.cluster_apiserver_ip.address}
            - deviceSelector:
                busPath: "0*"
+             dhcp: true
+             addresses:
+               - ${equinix_metal_reserved_ip_block.cluster_ingress_ip.address}
              vip:
-               ip: ${equinix_metal_reserved_ip_block.cluster_virtual_ip.network}
+               ip: ${equinix_metal_reserved_ip_block.cluster_ingress_ip.address}
                equinixMetal:
                  apiToken: ${var.equinix_metal_auth_token}
              routes:
-               - network: 169.254.255.1/32
-                 gateway: 10.69.64.134
-               - network: 169.254.255.2/32
-                 gateway: 10.69.64.134
+               - network: ${data.equinix_metal_device_bpg_neighbors.bgp_neighbor[0].peer_ips[0]}
+                 gateway: ${equinix_metal_device.cp[0].network.2}
        install:
          disk: /dev/sda
     EOT
@@ -91,7 +90,7 @@ resource "talos_machine_configuration_apply" "cp" {
     machine:
        certSANs:
          - ${var.kube_apiserver_domain}
-         - ${equinix_metal_reserved_ip_block.cluster_virtual_ip.network}
+         - ${equinix_metal_reserved_ip_block.cluster_apiserver_ip.network}
        kubelet:
          extraArgs:
            cloud-provider: external
@@ -116,7 +115,7 @@ resource "talos_machine_configuration_apply" "cp" {
            anonymous-auth: true
          certSANs:
            - ${var.kube_apiserver_domain}
-           - ${equinix_metal_reserved_ip_block.cluster_virtual_ip.network}
+           - ${equinix_metal_reserved_ip_block.cluster_apiserver_ip.network}
        inlineManifests:
          - name: cpem-secret
            contents: |
