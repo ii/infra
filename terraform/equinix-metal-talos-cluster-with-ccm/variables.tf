@@ -58,28 +58,48 @@ variable "kube_apiserver_domain" {
   default     = ""
 }
 
-variable "rfc2136_email_address" {
-  description = "the DNS zone"
+variable "acme_email_address" {
+  description = "the email address for LetsEncrypt"
   type        = string
   default     = ""
 }
 variable "rfc2136_nameserver" {
-  description = "the DNS zone"
+  description = "the nameserver address"
+  type        = string
+  default     = ""
+}
+variable "rfc2136_server" {
+  description = "the server IP address for the DNS nameserver"
   type        = string
   default     = ""
 }
 variable "rfc2136_tsig_keyname" {
-  description = "the DNS record name"
+  description = "the rfc2136 name of the tsig key"
   type        = string
   default     = ""
 }
 variable "rfc2136_tsig_key" {
-  description = "the DNS record ttl"
-  type        = number
-  default     = 60
+  description = "the "
+  type        = string
+  default     = ""
 }
 variable "rfc2136_algorithm" {
-  description = "the DNS record addresses"
-  type        = list(string)
-  default     = []
+  description = "the algorithm to use for rfc2136"
+  type        = string
+  default     = ""
+}
+variable "domain" {
+  description = "the DNS domain for records and certs"
+  type        = string
+  default     = ""
+}
+variable "pdns_api_key" {
+  description = "the API key for PowerDNS"
+  type        = string
+  default     = ""
+}
+variable "pdns_host" {
+  description = "the host address for PowerDNS"
+  type        = string
+  default     = ""
 }

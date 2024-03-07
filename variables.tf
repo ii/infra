@@ -45,3 +45,24 @@ variable "github_repository" {
   description = "the Flux repo name (infra)"
   default     = "infra"
 }
+
+variable "pdns_api_key" {
+  description = "the API key for PowerDNS"
+  type        = string
+  default     = ""
+}
+variable "pdns_host" {
+  description = "the host address for PowerDNS"
+  type        = string
+  default     = ""
+}
+variable "acme_email_address" {
+  description = "the email address for LetsEncrypt"
+  type        = string
+  default     = ""
+}
+variable "rfc2136_nameserver" {
+  description = "the DNS zone"
+  type        = string
+  default     = ""
+}

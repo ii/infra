@@ -57,3 +57,29 @@ variable "kube_apiserver_domain" {
   type        = string
   default     = ""
 }
+
+variable "rfc2136_email_address" {
+  description = "the DNS zone"
+  type        = string
+  default     = ""
+}
+variable "rfc2136_nameserver" {
+  description = "the DNS zone"
+  type        = string
+  default     = ""
+}
+variable "rfc2136_tsig_keyname" {
+  description = "the DNS record name"
+  type        = string
+  default     = ""
+}
+variable "rfc2136_tsig_key" {
+  description = "the DNS record ttl"
+  type        = number
+  default     = 60
+}
+variable "rfc2136_algorithm" {
+  description = "the DNS record addresses"
+  type        = list(string)
+  default     = []
+}

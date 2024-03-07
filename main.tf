@@ -10,6 +10,15 @@ module "sharing-io" {
   kubernetes_version       = local.kubernetes_version
   ipxe_script_url          = local.ipxe_script_url
   controlplane_nodes       = 3
+  acme_email_address       = "acme@ii.coop"
+  rfc2136_algorithm        = "HMACSHA256"
+  rfc2136_nameserver       = var.rfc2136_nameserver
+  rfc2136_server           = var.rfc2136_server
+  rfc2136_tsig_keyname     = var.rfc2136_tsig_keyname
+  rfc2136_tsig_key         = var.rfc2136_tsig_key
+  domain                   = "sharing.io"
+  pdns_host                = var.pdns_host
+  pdns_api_key             = var.pdns_api_key
 
   providers = {
     talos   = talos

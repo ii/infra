@@ -1,0 +1,100 @@
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-rfc2136
+  namespace: cert-manager
+spec:
+  acme:
+    # The ACME server URL
+    server: https://acme-v02.api.letsencrypt.org/directory
+
+    # Email address used for ACME registration
+    email: "${email}"
+
+    # Name of a secret used to store the ACME account private key
+    privateKeySecretRef:
+      name: letsencrypt
+    # https://cert-manager.io/docs/reference/api-docs/#acme.cert-manager.io/v1.ACMEIssuerDNS01ProviderRFC2136
+    # pdnsutil activate-tsig-key abcs.news sharing.io master # for each domain
+    solvers:
+      # https://cert-manager.io/docs/configuration/acme/dns01/
+      - dns01:
+          rfc2136:
+            nameserver: "${nameserver}"
+            tsigKeyName: "${keyname}"
+            tsigAlgorithm: "${algorithm}"
+            # the pdns secret needs to exist with key
+            tsigSecretSecretRef:
+              name: rfc2136
+              key: key
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-http01
+  namespace: cert-manager
+spec:
+  acme:
+    # The ACME server URL
+    server: https://acme-v02.api.letsencrypt.org/directory
+
+    # Email address used for ACME registration
+    email: "${email}"
+
+    # Name of a secret used to store the ACME account private key
+    privateKeySecretRef:
+      name: letsencrypt
+    # https://cert-manager.io/docs/reference/api-docs/#acme.cert-manager.io/v1.ACMEIssuerDNS01ProviderRFC2136
+    # https://cert-manager.io/docs/reference/api-docs/#acme.cert-manager.io/v1.ACMEIssuerDNS01ProviderWebhook
+    # pdnsutil activate-tsig-key abcs.news sharing.io master # for each domain
+    solvers:
+      # https://cert-manager.io/docs/configuration/acme/http01/
+      # https://cert-manager.io/docs/configuration/acme/http01/#ingresstemplate
+      - http01:
+          ingress:
+            ingressClassName: nginx
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-pdns
+  namespace: cert-manager
+spec:
+  acme:
+    # The ACME server URL
+    server: https://acme-v02.api.letsencrypt.org/directory
+
+    # Email address used for ACME registration
+    email: "${email}"
+
+    # Name of a secret used to store the ACME account private key
+    privateKeySecretRef:
+      name: letsencrypt
+    # https://cert-manager.io/docs/reference/api-docs/#acme.cert-manager.io/v1.ACMEIssuerDNS01ProviderRFC2136
+    # https://cert-manager.io/docs/reference/api-docs/#acme.cert-manager.io/v1.ACMEIssuerDNS01ProviderWebhook
+    # pdnsutil activate-tsig-key abcs.news sharing.io master # for each domain
+    solvers:
+      # - selector:
+      #     dnsNames:
+      #       - "*.${ALLOWED_ZONE:=ii.nz}"
+      #       - "${ALLOWED_ZONE:=ii.nz}"
+      # https://cert-manager.io/docs/configuration/acme/dns01/
+      - dns01:
+          webhook:
+            # This group needs to be configured when installing the helm package, otherwise the webhook won't have permission to create an ACME challenge for this API group.
+            groupName: "${domain}"
+            solverName: pdns
+            config:
+              # zone: example.com # (Optional): When not provided the Zone will obtained by cert-manager's ResolvedZone
+              host: "${pdnshost}"
+              serverID: "localhost"
+              ttl: 60
+              headers:
+                hello: "there"
+              allowed-zones:
+                - "${domain}."
+                - "${domain}"
+              apiKeySecretRef:
+                name: pdns
+                key: api-key
