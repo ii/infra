@@ -23,3 +23,7 @@ spec:
         kind: HelmRepository
         name: rook-release
       version: 1.13.5
+  values:
+    containerSecurityContext:
+      seccompProfile:
+        type: RuntimeDefault
