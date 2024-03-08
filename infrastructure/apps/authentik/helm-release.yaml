@@ -31,9 +31,15 @@ spec:
   values:
     # https://github.com/goauthentik/helm/blob/c51952b024451ee90fc3603fae24f39472b1b197/charts/authentik/templates/server-deployment.yaml#L77
     # https://github.com/goauthentik/helm/blob/c51952b024451ee90fc3603fae24f39472b1b197/charts/authentik/templates/worker-deployment.yaml#L80
-    envFrom:
-      - secretRef:
-          name: authentik-env
+    global:
+      envFrom:
+        - secretRef:
+            name: authentik-env
+      env:
+        - name: AUTHENTIK_BOOTSTRAP_EMAIL
+          value: sharing.io@ii.coop
+        - name: AUTHENTIK_ERROR_REPORTING__ENABLED
+          value: "true"
     #   AUTHENTIK_SECRET_KEY:
     #     secretKeyRef:
     #       name: authentik-env
@@ -50,13 +56,8 @@ spec:
     #     secretKeyRef:
     #       name: authentik-postgresql
     #       key: postgresql-password
-    env:
       # Set the email address for the default akadmin user.
       # https://goauthentik.io/docs/installation/automated-install#authentik_bootstrap_email
-      - name: AUTHENTIK_BOOTSTRAP_EMAIL
-        value: sharing.io@ii.coop
-      - name: AUTHENTIK_ERROR_REPORTING__ENABLED
-        value: "true"
       # - name: AUTHENTIK_SECRET_KEY
       #   valueFrom:
       #     secretKeyRef:
