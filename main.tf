@@ -53,14 +53,9 @@ module "sharing-io-record-ingress-ip" {
 }
 
 module "sharing-io-manifests" {
-  source                 = "./terraform/manifests"
-  k8s_host               = module.sharing-io.kubeconfig.kubernetes_client_configuration.host
-  k8s_client_certificate = module.sharing-io.kubeconfig.kubernetes_client_configuration.client_certificate
-  k8s_client_key         = module.sharing-io.kubeconfig.kubernetes_client_configuration.client_key
-  k8s_ca_certificate     = module.sharing-io.kubeconfig.kubernetes_client_configuration.ca_certificate
-
+  source = "./terraform/manifests"
   providers = {
-    kubernetes = kubernetes
+    kubernetes = kubernetes.sharing-io
   }
   depends_on = [module.sharing-io]
 }

@@ -24,6 +24,10 @@ terraform {
       source  = "integrations/github"
       version = "6.0.0"
     }
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "2.27.0"
+    }
   }
   backend "kubernetes" {
     secret_suffix = "state"
@@ -55,4 +59,11 @@ provider "dns" {
     key_secret    = var.rfc2136_tsig_key
     key_algorithm = "hmac-sha256"
   }
+}
+provider "kubernetes" {
+  alias                  = "sharing-io"
+  host                   = module.sharing-io.kubeconfig.kubernetes_client_configuration.host
+  client_certificate     = base64decode(module.sharing-io.kubeconfig.kubernetes_client_configuration.client_certificate)
+  client_key             = base64decode(module.sharing-io.kubeconfig.kubernetes_client_configuration.client_key)
+  cluster_ca_certificate = base64decode(module.sharing-io.kubeconfig.kubernetes_client_configuration.ca_certificate)
 }
