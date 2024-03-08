@@ -52,23 +52,18 @@ module "sharing-io-record-ingress-ip" {
   depends_on = [module.sharing-io]
 }
 
-# module "sharing-io-metallb" {
-#   source       = "./terraform/metallb"
-#   ingress_ip   = module.sharing-io.cluster_ingress_ip
-#   customer_asn    = module.sharing-io.data.equinix_metal_device_bgp_neighbors.bpg_neighbor
-#   customer_ip    = ""
-#   peer_as     = ""
-#   peer_ips = ""
+module "sharing-io-manifests" {
+  source                 = "./terraform/manifests"
+  k8s_host               = module.sharing-io.kubeconfig.kubernetes_client_configuration.host
+  k8s_client_certificate = module.sharing-io.kubeconfig.kubernetes_client_configuration.client_certificate
+  k8s_client_key         = module.sharing-io.kubeconfig.kubernetes_client_configuration.client_key
+  k8s_ca_certificate     = module.sharing-io.kubeconfig.kubernetes_client_configuration.ca_certificate
 
-#   k8s_host               = module.sharing-io.kubeconfig.kubernetes_client_configuration.host
-#   k8s_client_certificate = module.sharing-io.kubeconfig.kubernetes_client_configuration.client_certificate
-#   k8s_client_key         = module.sharing-io.kubeconfig.kubernetes_client_configuration.client_key
-#   k8s_ca_certificate     = module.sharing-io.kubeconfig.kubernetes_client_configuration.ca_certificate
-
-#   providers = {
-#     kubernetes = kubernetes
-#   }
-# }
+  providers = {
+    kubernetes = kubernetes
+  }
+  depends_on = [module.sharing-io]
+}
 
 module "sharing-io-flux-bootstrap" {
   source = "./terraform/flux-bootstrap"
