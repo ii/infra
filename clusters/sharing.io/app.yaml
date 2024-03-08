@@ -7,8 +7,8 @@ metadata:
 spec:
   interval: 10m0s
   path: ./infrastructure/apps
-  dependsOn:
-    - name: configs
+  # dependsOn:
+  #   - name: configs
   prune: true
   wait: true
   sourceRef:
