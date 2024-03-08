@@ -9,8 +9,8 @@ spec:
   releaseName: authentik
   storageNamespace: flux-system
   # We install the namespace with the secret
-  # install:
-  #   createNamespace: false
+  install:
+    createNamespace: false
   interval: 30m
   chart:
     spec:
