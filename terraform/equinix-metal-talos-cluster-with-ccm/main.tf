@@ -76,14 +76,48 @@ resource "talos_machine_configuration_apply" "cp" {
              - ${each.value.network.0.address}/32
          extraArgs:
            cloud-provider: external
+       install:
+         disk: /dev/sda
+         extraKernelArgs:
+            - console=console=ttyS1,115200n8
+         wipe: false
+         image: factory.talos.dev/installer/0c2f6ca92c4bb5f7b79de5849bd2e96e026df55e4c18939df217e4f7d092a7c6:v1.6.6
+         # image: ghcr.io/siderolabs/installer:v1.6.6
+         # extensions:
+         #   - image: ghcr.io/siderolabs/gvisor:20231214.0-v1.6.6
+         #   - image: ghcr.io/siderolabs/mdadm:v4.2-v1.6.6
+         #   - image: ghcr.io/siderolabs/zfs:2.1.14-v1.6.6
+         #   - image: ghcr.io/siderolabs/iscsi-tools:v0.1.4
        network:
          hostname: ${each.value.hostname}
          interfaces:
            - interface: lo
              addresses:
                - ${equinix_metal_reserved_ip_block.cluster_apiserver_ip.address}
-           - deviceSelector:
-               busPath: "0*"
+           # - interface: bond0
+           #   bond:
+           #     # interfaces:
+           #     #   - enp65sf0f0
+           #     #   - enp65sf0f1
+           #     deviceSelectors:
+           #        - busPath: "0*"
+           #   dhcp: true
+           #   addresses:
+           #     - ${equinix_metal_reserved_ip_block.cluster_ingress_ip.address}
+           #   # TODO: Figure out exactly what this option is supposed to do
+           #   # Ideally it works a bit like CCM / CPEM
+           #   vip:
+           #     ip: ${equinix_metal_reserved_ip_block.cluster_ingress_ip.address}
+           #     equinixMetal:
+           #       apiToken: ${var.equinix_metal_auth_token}
+           #   routes:
+           #     - network: ${data.equinix_metal_device_bgp_neighbors.bgp_neighbor[each.key].bgp_neighbors[0].peer_ips[0]}/32
+           #       gateway: ${[for k in each.value.network : k.gateway if k.public == false && k.family == 4][0]}
+           #     - network: ${data.equinix_metal_device_bgp_neighbors.bgp_neighbor[each.key].bgp_neighbors[0].peer_ips[1]}/32
+           #       gateway: ${[for k in each.value.network : k.gateway if k.public == false && k.family == 4][0]}
+           # - deviceSelector:
+           #     busPath: "0*"
+           - interface: enp65sf0f0
              dhcp: true
              addresses:
                - ${equinix_metal_reserved_ip_block.cluster_ingress_ip.address}
