@@ -81,7 +81,7 @@ resource "talos_machine_configuration_apply" "cp" {
          extraKernelArgs:
             - console=console=ttyS1,115200n8
          wipe: false
-         image: factory.talos.dev/installer/0c2f6ca92c4bb5f7b79de5849bd2e96e026df55e4c18939df217e4f7d092a7c6:v1.6.6
+         image: factory.talos.dev/installer/c7386c667d7b70374222de2cf9403bf24922a0bb8df4a0df6b4ae169320f0139:v1.6.6
          # image: ghcr.io/siderolabs/installer:v1.6.6
          # extensions:
          #   - image: ghcr.io/siderolabs/gvisor:20231214.0-v1.6.6
@@ -94,7 +94,16 @@ resource "talos_machine_configuration_apply" "cp" {
            - interface: lo
              addresses:
                - ${equinix_metal_reserved_ip_block.cluster_apiserver_ip.address}
-           # - interface: bond0
+           - interface: bond0
+             vip:
+               ip: ${equinix_metal_reserved_ip_block.cluster_ingress_ip.address}
+               equinixMetal:
+                 apiToken: ${var.equinix_metal_auth_token}
+             routes:
+               - network: ${data.equinix_metal_device_bgp_neighbors.bgp_neighbor[each.key].bgp_neighbors[0].peer_ips[0]}/32
+                 gateway: ${[for k in each.value.network : k.gateway if k.public == false && k.family == 4][0]}
+               - network: ${data.equinix_metal_device_bgp_neighbors.bgp_neighbor[each.key].bgp_neighbors[0].peer_ips[1]}/32
+                 gateway: ${[for k in each.value.network : k.gateway if k.public == false && k.family == 4][0]}
            #   bond:
            #     # interfaces:
            #     #   - enp65sf0f0
@@ -117,21 +126,10 @@ resource "talos_machine_configuration_apply" "cp" {
            #       gateway: ${[for k in each.value.network : k.gateway if k.public == false && k.family == 4][0]}
            # - deviceSelector:
            #     busPath: "0*"
-           - interface: enp65sf0f0
-             dhcp: true
-             addresses:
-               - ${equinix_metal_reserved_ip_block.cluster_ingress_ip.address}
-             vip:
-               ip: ${equinix_metal_reserved_ip_block.cluster_ingress_ip.address}
-               equinixMetal:
-                 apiToken: ${var.equinix_metal_auth_token}
-             routes:
-               - network: ${data.equinix_metal_device_bgp_neighbors.bgp_neighbor[each.key].bgp_neighbors[0].peer_ips[0]}/32
-                 gateway: ${[for k in each.value.network : k.gateway if k.public == false && k.family == 4][0]}
-               - network: ${data.equinix_metal_device_bgp_neighbors.bgp_neighbor[each.key].bgp_neighbors[0].peer_ips[1]}/32
-                 gateway: ${[for k in each.value.network : k.gateway if k.public == false && k.family == 4][0]}
-       install:
-         disk: /dev/sda
+           # - interface: enp65sf0f0
+           #   dhcp: true
+           #   addresses:
+           #     - ${equinix_metal_reserved_ip_block.cluster_ingress_ip.address}
     EOT
     ,
     <<-EOT
