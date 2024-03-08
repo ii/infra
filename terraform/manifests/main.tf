@@ -45,7 +45,6 @@ resource "kubernetes_secret_v1" "metal-cloud-config" {
 
   data = {
     "cloud-sa.json" = jsonencode({
-      // TODO make variables and pass through
       apiKey                  = var.equinix_metal_auth_token
       projectID               = var.equinix_metal_project_id
       metro                   = var.equinix_metal_metro
@@ -63,7 +62,6 @@ resource "kubernetes_config_map_v1" "ingress-ip" {
   }
 
   data = {
-    // TODO create var and pass value through
     ingressip = var.ingress_ip
   }
 }
@@ -75,7 +73,6 @@ resource "kubernetes_secret_v1" "rfc2136-dns-server" {
   }
 
   data = {
-    // TODO create vars and pass throuhg values
     email      = var.acme_email_address
     nameserver = var.rfc2136_nameserver
     keyname    = var.rfc2136_tsig_keyname
@@ -94,7 +91,6 @@ resource "kubernetes_secret_v1" "rfc2136-cert-manager" {
   }
 
   data = {
-    // TODO create vars and pass throuhg values
     key = var.rfc2136_tsig_key
   }
 }
@@ -106,7 +102,25 @@ resource "kubernetes_secret_v1" "pdns-cert-manager" {
   }
 
   data = {
-    // TODO create vars and pass throuhg values
     api-key = var.pdns_api_key
+  }
+}
+
+resource "random_string" "flux_receiver_token" {
+  length  = 12
+  special = false
+  lower   = true
+  upper   = false
+  numeric = false
+}
+
+resource "kubernetes_secret_v1" "flux_receiver_token" {
+  metadata {
+    name      = "receiver-token"
+    namespace = "flux-system"
+  }
+
+  data = {
+    token = random_string.flux_receiver_token.result
   }
 }

@@ -4,3 +4,4 @@ kind: Kustomization
 resources:
   - ./cluster-issuers.yaml
   - ./certificates.yaml
+  - ./flux-receiver.yaml

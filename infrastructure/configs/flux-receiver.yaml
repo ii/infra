@@ -1,0 +1,41 @@
+---
+apiVersion: notification.toolkit.fluxcd.io/v1
+kind: Receiver
+metadata:
+  name: github-receiver
+  namespace: flux-system
+spec:
+  type: github
+  events:
+    - "ping"
+    - "push"
+  secretRef:
+    name: receiver-token
+  resources:
+    - apiVersion: source.toolkit.fluxcd.io/v1
+      kind: GitRepository
+      name: flux-system
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: webhook-receiver
+  namespace: flux-system
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-http01"
+spec:
+  rules:
+    - host: "flux-webhook.${domain}"
+      http:
+        paths:
+          - backend:
+              service:
+                name: webhook-receiver
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix
+  tls:
+    - secretName: "flux-webhook-tls"
+      hosts:
+        - "flux-webhook.${domain}"
