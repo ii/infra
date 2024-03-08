@@ -31,28 +31,47 @@ spec:
   values:
     # https://github.com/goauthentik/helm/blob/c51952b024451ee90fc3603fae24f39472b1b197/charts/authentik/templates/server-deployment.yaml#L77
     # https://github.com/goauthentik/helm/blob/c51952b024451ee90fc3603fae24f39472b1b197/charts/authentik/templates/worker-deployment.yaml#L80
-    envValueFrom:
-      AUTHENTIK_SECRET_KEY:
-        secretKeyRef:
+    envFrom:
+      - secretRef:
           name: authentik-env
-          key: AUTHENTIK_SECRET_KEY
-      AUTHENTIK_BOOTSTRAP_PASSWORD:
-        secretKeyRef:
-          name: authentik-env
-          key: AUTHENTIK_BOOTSTRAP_PASSWORD
-      AUTHENTIK_BOOTSTRAP_TOKEN:
-        secretKeyRef:
-          name: authentik-env
-          key: AUTHENTIK_BOOTSTRAP_TOKEN
-      POSTGRES_PASSWORD:
-        secretKeyRef:
-          name: authentik-postgresql
-          key: postgresql-password
+    #   AUTHENTIK_SECRET_KEY:
+    #     secretKeyRef:
+    #       name: authentik-env
+    #       key: AUTHENTIK_SECRET_KEY
+    #   AUTHENTIK_BOOTSTRAP_PASSWORD:
+    #     secretKeyRef:
+    #       name: authentik-env
+    #       key: AUTHENTIK_BOOTSTRAP_PASSWORD
+    #   AUTHENTIK_BOOTSTRAP_TOKEN:
+    #     secretKeyRef:
+    #       name: authentik-env
+    #       key: AUTHENTIK_BOOTSTRAP_TOKEN
+    #   POSTGRES_PASSWORD:
+    #     secretKeyRef:
+    #       name: authentik-postgresql
+    #       key: postgresql-password
     env:
       # Set the email address for the default akadmin user.
       # https://goauthentik.io/docs/installation/automated-install#authentik_bootstrap_email
-      AUTHENTIK_BOOTSTRAP_EMAIL: sharing.io@ii.coop
-      AUTHENTIK_ERROR_REPORTING__ENABLED: "true"
+      - name: AUTHENTIK_BOOTSTRAP_EMAIL
+        value: sharing.io@ii.coop
+      - name: AUTHENTIK_ERROR_REPORTING__ENABLED
+        value: "true"
+      # - name: AUTHENTIK_SECRET_KEY
+      #   valueFrom:
+      #     secretKeyRef:
+      #       name: authenik-env
+      #       key: AUTHENTIK_SECRET_KEY
+      # - name: AUTHENTIK_BOOTSTRAP_PASSWORD
+      #   valueFrom:
+      #     secretKeyRef:
+      #       name: authenik-env
+      #       key: AUTHENTIK_BOOTSTRAP_PASSWORD
+      # - name: AUTHENTIK_BOOTSTRAP_TOKEN
+      #   valueFrom:
+      #     secretKeyRef:
+      #       name: authenik-env
+      #       key: AUTHENTIK_BOOTSTRAP_TOKEN
       # https://goauthentik.io/integrations/services/powerdns-admin/
     # While this works, I wantted to be more exlplicit, so we moved to envValueFrom above
     # envFrom:
