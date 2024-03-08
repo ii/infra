@@ -27,6 +27,8 @@ spec:
         deviceFilter: "^sd[c-d]"
     ingress:
       dashboard:
+        annotations:
+          cert-manager.io/cluster-issuer: "letsencrypt-http01"
         host:
           name: "ceph.${domain}"
         tls:
@@ -70,7 +72,8 @@ spec:
         ingress:
           # Enable an ingress for the ceph-objectstore
           enabled: true
-          # annotations: {}
+          annotations:
+            cert-manager.io/cluster-issuer: "letsencrypt-http01"
           host:
             name: "s3.${domain}"
             path: /
