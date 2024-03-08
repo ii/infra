@@ -68,11 +68,6 @@ variable "rfc2136_nameserver" {
   type        = string
   default     = ""
 }
-variable "rfc2136_server" {
-  description = "the server IP address for the DNS nameserver"
-  type        = string
-  default     = ""
-}
 variable "rfc2136_tsig_keyname" {
   description = "the rfc2136 name of the tsig key"
   type        = string

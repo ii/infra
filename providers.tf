@@ -50,7 +50,7 @@ provider "github" {
 }
 provider "dns" {
   update {
-    server        = var.rfc2136_server
+    server        = var.rfc2136_nameserver
     key_name      = var.rfc2136_tsig_keyname
     key_secret    = var.rfc2136_tsig_key
     key_algorithm = "hmac-sha256"

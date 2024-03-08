@@ -13,7 +13,6 @@ module "sharing-io" {
   acme_email_address       = "acme@ii.coop"
   rfc2136_algorithm        = "HMACSHA256"
   rfc2136_nameserver       = var.rfc2136_nameserver
-  rfc2136_server           = var.rfc2136_server
   rfc2136_tsig_keyname     = var.rfc2136_tsig_keyname
   rfc2136_tsig_key         = var.rfc2136_tsig_key
   domain                   = "sharing.io"

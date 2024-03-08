@@ -174,6 +174,15 @@ resource "talos_machine_configuration_apply" "cp" {
                domain: ${var.domain}
                pdnsapikey: ${var.pdns_api_key}
                pdnshost: ${var.pdns_host}
+         - name: cert-manager-rfc2136
+           contents: |
+             apiVersion: v1
+             kind: Secret
+             metadata:
+               name: rfc2136
+               namespace: cert-manager
+             stringData:
+               key: ${var.rfc2136_tsig_key}
          - name: cert-manager-pdns
            contents: |
              apiVersion: v1

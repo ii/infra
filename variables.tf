@@ -10,8 +10,8 @@ variable "equinix_metal_auth_token" {
   default     = ""
 }
 
-variable "rfc2136_server" {
-  description = "the address for a RFC2136 compliant DNS server"
+variable "rfc2136_nameserver" {
+  description = "the DNS zone"
   type        = string
   default     = ""
 }
@@ -58,11 +58,6 @@ variable "pdns_host" {
 }
 variable "acme_email_address" {
   description = "the email address for LetsEncrypt"
-  type        = string
-  default     = ""
-}
-variable "rfc2136_nameserver" {
-  description = "the DNS zone"
   type        = string
   default     = ""
 }
