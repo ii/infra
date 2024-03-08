@@ -157,7 +157,7 @@ resource "random_string" "authentik_bootstrap_token" {
 }
 # TODO move outside the manifest module
 resource "random_string" "authentik_secret_key" {
-  length  = 16
+  length  = 50
   special = false
   lower   = true
   upper   = false
