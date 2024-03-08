@@ -42,7 +42,7 @@ spec:
       defaultClass: true
       defaultFsType: "ext4"
       defaultMkfsParams: ""
-      defaultClassReplicaCount: 1 # We only have one node
+      defaultClassReplicaCount: 3 # We only have one node
       defaultDataLocality: disabled # best-effort otherwise
       reclaimPolicy: "Retain"
       # reclaimPolicy: "Delete"
@@ -53,7 +53,8 @@ spec:
       tlsSecret: longhorn-tls
       ingressClassName: nginx
       # tls: true
-      host: "longhorn.${domain}"
+      # host: "longhorn.${domain}"
+      host: "longhorn.sharing.io"
       annotations:
         cert-manager.io/cluster-issuer: "letsencrypt-http01"
     # enablePSP: true

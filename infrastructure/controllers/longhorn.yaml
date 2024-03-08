@@ -6,15 +6,15 @@ metadata:
   namespace: flux-system
 spec:
   interval: 10m0s
-  path: ./infrastructure/controllers/rook-ceph
+  path: ./infrastructure/controllers/longhorn
   prune: true
   wait: true
   sourceRef:
     kind: GitRepository
     name: flux-system
-  postBuild:
-    substituteFrom:
-      - kind: Secret
-        # NOTE: contains the value "domain" but we may need or like
-        #       to swap it out for a Secret which makes more sense
-        name: rfc2136dnsserver
+  # postBuild:
+  #   substituteFrom:
+  #     - kind: Secret
+  #       # NOTE: contains the value "domain" but we may need or like
+  #       #       to swap it out for a Secret which makes more sense
+  #       name: rfc2136dnsserver
