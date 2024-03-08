@@ -5,6 +5,6 @@ resources:
   - ./00-namespaces.yaml
   - ./ingress-nginx.yaml
   - ./cert-manager-webhook-pdns.yaml
-  - ./rook-ceph
+  - ./rook-ceph.yaml
   - ./cert-manager
   - ./metallb
