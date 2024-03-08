@@ -1,0 +1,64 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: HelmRepository
+metadata:
+  name: longhorn
+  namespace: flux-system
+spec:
+  interval: 24h
+  url: https://charts.longhorn.io
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+# https://fluxcd.io/flux/components/helm/helmreleases/#specification
+metadata:
+  name: longhorn
+  namespace: flux-system
+spec:
+  targetNamespace: longhorn
+  releaseName: longhorn
+  install:
+    createNamespace: true
+  storageNamespace: flux-system
+  maxHistory: 10
+  interval: 30m
+  chart:
+    spec:
+      chart: longhorn
+      version: "1.6.0"
+      interval: 12h
+      sourceRef:
+        kind: HelmRepository
+        name: longhorn
+        namespace: flux-system
+  # dependsOn:
+  #   - name: ingress-nginx
+  # https://github.com/longhorn/charts/blob/v1.5.x/charts/longhorn/values.yaml
+  values:
+    # https://longhorn.io/docs/archives/1.1.0/advanced-resources/rwx-workloads/
+    # By sure to apt-get install nfs-common
+    # https://github.com/longhorn/charts/blob/v1.5.x/charts/longhorn/values.yaml#L83
+    persistence:
+      defaultClass: true
+      defaultFsType: "ext4"
+      defaultMkfsParams: ""
+      defaultClassReplicaCount: 1 # We only have one node
+      defaultDataLocality: disabled # best-effort otherwise
+      reclaimPolicy: "Retain"
+      # reclaimPolicy: "Delete"
+      migrateable: false # What is this?
+    ingress:
+      enabled: true
+      tls: true
+      tlsSecret: longhorn-tls
+      ingressClassName: nginx
+      # tls: true
+      host: "longhorn.${domain}"
+      annotations:
+        cert-manager.io/cluster-issuer: "letsencrypt-http01"
+    # enablePSP: true
+    # namespaceOverride: "longhorn"
+    # kubernetes.io/tls-acme: true
+    # tls: true
+    # tlsSecret: wildcard-tls
+  # values:

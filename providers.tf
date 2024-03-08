@@ -61,9 +61,10 @@ provider "dns" {
   }
 }
 provider "kubernetes" {
-  alias                  = "sharing-io"
-  host                   = module.sharing-io.kubeconfig.kubernetes_client_configuration.host
-  client_certificate     = base64decode(module.sharing-io.kubeconfig.kubernetes_client_configuration.client_certificate)
-  client_key             = base64decode(module.sharing-io.kubeconfig.kubernetes_client_configuration.client_key)
-  cluster_ca_certificate = base64decode(module.sharing-io.kubeconfig.kubernetes_client_configuration.ca_certificate)
+  alias       = "sharing-io"
+  config_path = "./tmp/sharing.io-kubeconfig"
+  # host                   = module.sharing-io.kubeconfig.kubernetes_client_configuration.host
+  # client_certificate     = base64decode(module.sharing-io.kubeconfig.kubernetes_client_configuration.client_certificate)
+  # client_key             = base64decode(module.sharing-io.kubeconfig.kubernetes_client_configuration.client_key)
+  # cluster_ca_certificate = base64decode(module.sharing-io.kubeconfig.kubernetes_client_configuration.ca_certificate)
 }

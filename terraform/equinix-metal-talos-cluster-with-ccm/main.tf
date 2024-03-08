@@ -58,7 +58,19 @@ resource "talos_machine_configuration_apply" "cp" {
   config_patches = [
     <<-EOT
     machine:
+       disks:
+         - device: /dev/sdb
+           partitions:
+             - mountpoint: /var/lib/longhorn
        kubelet:
+         extraMounts:
+           - destination: /var/lib/longhorn
+             type: bind
+             source: /var/lib/longhorn
+             options:
+             - bind
+             - rshared
+             - rw
          nodeIP:
            validSubnets:
              - ${each.value.network.0.address}/32
