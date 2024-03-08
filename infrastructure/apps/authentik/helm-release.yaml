@@ -109,6 +109,11 @@ spec:
       # performance data to sentry.io, and is fully opt-in
     postgresql:
       enabled: true
+      auth:
+        existingSecret: authentik-env
+        secretKeys:
+          adminPasswordKey: AUTHENTIK_POSTGRESQL__PASSWORD
+          userPasswordKey: AUTHENTIK_POSTGRESQL__PASSWORD
       # As part of the upgrade from Postgres 11 to 15:
       # https://goauthentik.io/docs/troubleshooting/postgres/upgrade_kubernetes#:~:text=Stop%20PostgreSQL%20and%20start%20the%20upgrade%E2%80%8B&text=Now%20run%20helm%20upgrade%20%2D%2D,repeat%20the%20steps%20from%20Prerequisites.
       # While in diagnosticMode we can manipulate the data
@@ -116,10 +121,5 @@ spec:
       #   enabled: true
       # image:
       #   tag: 15.2.0-debian-11-r26
-      # auth:
-      #   existingSecret: authentik-env
-      #   secretKeys:
-      #     adminPasswordKey: AUTHENTIK_POSTGRESQL__PASSWORD
-      #     userPasswordKey: AUTHENTIK_POSTGRESQL__PASSWORD
     redis:
       enabled: true
