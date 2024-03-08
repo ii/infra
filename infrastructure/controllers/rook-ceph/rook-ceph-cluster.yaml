@@ -34,6 +34,7 @@ spec:
         tls:
           - hosts:
             - "ceph.${domain}"
+            secretName: "ceph-rook-ceph-tls"
     cephObjectStores:
       - name: objectstore
         # see https://github.com/rook/rook/blob/master/Documentation/CRDs/Object-Storage/ceph-object-store-crd.md#object-store-settings for available configuration
@@ -80,4 +81,5 @@ spec:
           tls:
           - hosts:
               - "s3.${domain}"
+            secretName: "s3-rook-ceph-tls"
           #   secretName: ceph-objectstore-tls
