@@ -78,3 +78,16 @@ module "sharing-io-flux-bootstrap" {
     github = github
   }
 }
+
+module "sharing-io-flux-github-webhook" {
+  source = "./terraform/flux-github-webhook"
+
+  repo   = "${var.github_org}/infra"
+  domain = "sharing.io"
+  secret = module.sharing-io-manifests.flux_receiver_token
+
+  providers = {
+    github     = github
+    kubernetes = kubernetes.sharing-io
+  }
+}

@@ -106,6 +106,7 @@ resource "kubernetes_secret_v1" "pdns-cert-manager" {
   }
 }
 
+# TODO move outside the manifest module
 resource "random_string" "flux_receiver_token" {
   length  = 12
   special = false
