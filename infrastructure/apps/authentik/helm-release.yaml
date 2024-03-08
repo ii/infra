@@ -40,21 +40,21 @@ spec:
           value: sharing.io@ii.coop
         - name: AUTHENTIK_ERROR_REPORTING__ENABLED
           value: "true"
-    # server:
-    #   ingress:
-    #     ingressClassName: "nginx"
-    #     enabled: true
-    #     annotations:
-    #       cert-manager.io/cluster-issuer: "letsencrypt-http01"
-    #     tls:
-    #       - secretName: authentik-tls
-    #         hosts:
-    #           - ${AUTHENTIK_INGRESS_HOST:=sso.sharing.io}
-    #     hosts:
-    #       - ${AUTHENTIK_INGRESS_HOST:=sso.sharing.io}
-    #     paths:
-    #       - "/"
-    #     pathType: Prefix
+    server:
+      ingress:
+        ingressClassName: "nginx"
+        enabled: true
+        annotations:
+          cert-manager.io/cluster-issuer: "letsencrypt-http01"
+        tls:
+          - secretName: authentik-tls
+            hosts:
+              - ${AUTHENTIK_INGRESS_HOST:=sso.sharing.io}
+        hosts:
+          - ${AUTHENTIK_INGRESS_HOST:=sso.sharing.io}
+        paths:
+          - "/"
+        pathType: Prefix
     #   AUTHENTIK_SECRET_KEY:
     #     secretKeyRef:
     #       name: authentik-env
