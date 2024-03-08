@@ -4,7 +4,7 @@ kind: Kustomization
 resources:
   - ./00-namespaces.yaml
   - ./ingress-nginx.yaml
-  - ./cert-manager-webhook-pdns.yaml
+  # - ./cert-manager-webhook-pdns.yaml
   - ./longhorn.yaml
   - ./cert-manager
   - ./metallb
