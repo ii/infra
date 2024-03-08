@@ -37,6 +37,19 @@ resource "kubernetes_namespace" "cert-manager" {
   }
 }
 
+resource "kubernetes_namespace" "authentik" {
+  metadata {
+    name = "authentik"
+  }
+
+  lifecycle {
+    prevent_destroy = true
+    ignore_changes = [
+      metadata["labels"],
+    ]
+  }
+}
+
 resource "kubernetes_secret_v1" "metal-cloud-config" {
   metadata {
     name      = "metal-cloud-config"
@@ -123,5 +136,43 @@ resource "kubernetes_secret_v1" "flux_receiver_token" {
 
   data = {
     token = random_string.flux_receiver_token.result
+  }
+}
+
+# TODO move outside the manifest module
+resource "random_string" "authentik_bootstrap_password" {
+  length  = 16
+  special = false
+  lower   = true
+  upper   = false
+  numeric = false
+}
+# TODO move outside the manifest module
+resource "random_string" "authentik_bootstrap_token" {
+  length  = 16
+  special = false
+  lower   = true
+  upper   = false
+  numeric = false
+}
+# TODO move outside the manifest module
+resource "random_string" "authentik_secret_key" {
+  length  = 16
+  special = false
+  lower   = true
+  upper   = false
+  numeric = false
+}
+
+resource "kubernetes_secret_v1" "authentik_env" {
+  metadata {
+    name      = "authentik-env"
+    namespace = "authentik"
+  }
+
+  data = {
+    AUTHENTIK_BOOTSTRAP_PASSWORD = random_string.authentik_bootstrap_password.result
+    AUTHENTIK_BOOTSTRAP_TOKEN    = random_string.authentik_bootstrap_token.result
+    AUTHENTIK_SECRET_KEY         = random_string.authentik_secret_key.result
   }
 }
