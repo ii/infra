@@ -25,6 +25,8 @@ spec:
   interval: 1h0m0s
   values:
     controller:
+      ingressClassResource:
+        default: true
       service:
         externalIPs:
           - "${ingressip}"
