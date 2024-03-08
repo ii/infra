@@ -50,24 +50,6 @@ resource "kubernetes_namespace" "authentik" {
   }
 }
 
-resource "kubernetes_secret_v1" "metal-cloud-config" {
-  metadata {
-    name      = "metal-cloud-config"
-    namespace = "kube-system"
-  }
-
-  data = {
-    "cloud-sa.json" = jsonencode({
-      apiKey                  = var.equinix_metal_auth_token
-      projectID               = var.equinix_metal_project_id
-      metro                   = var.equinix_metal_metro
-      eipTag                  = "eip-apiserver-${var.cluster_name}"
-      eipHealthCheckUseHostIP = true
-      loadBalancer            = "metallb:///metallb-system?crdConfiguration=true"
-    })
-  }
-}
-
 resource "kubernetes_config_map_v1" "ingress-ip" {
   metadata {
     name      = "ingressip"
