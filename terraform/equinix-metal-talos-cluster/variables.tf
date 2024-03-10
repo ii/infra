@@ -48,7 +48,7 @@ variable "kubernetes_version" {
 }
 variable "ipxe_script_url" {
   type        = string
-  default     = "https://pxe.factory.talos.dev/pxe/376567988ad370138ad8b2698212367b8edcb69b5fd68c80be1f2ec7d603b4ba/v1.6.5/metal-amd64"
+  default     = "https://pxe.factory.talos.dev/pxe/0c2f6ca92c4bb5f7b79de5849bd2e96e026df55e4c18939df217e4f7d092a7c6/v1.6.5/metal-amd64"
   description = "https://factory.talos.dev"
 }
 
@@ -58,28 +58,43 @@ variable "kube_apiserver_domain" {
   default     = ""
 }
 
-variable "rfc2136_email_address" {
-  description = "the DNS zone"
+variable "acme_email_address" {
+  description = "the email address for LetsEncrypt"
   type        = string
   default     = ""
 }
 variable "rfc2136_nameserver" {
-  description = "the DNS zone"
+  description = "the nameserver address"
   type        = string
   default     = ""
 }
 variable "rfc2136_tsig_keyname" {
-  description = "the DNS record name"
+  description = "the rfc2136 name of the tsig key"
   type        = string
   default     = ""
 }
 variable "rfc2136_tsig_key" {
-  description = "the DNS record ttl"
-  type        = number
-  default     = 60
+  description = "the "
+  type        = string
+  default     = ""
 }
 variable "rfc2136_algorithm" {
-  description = "the DNS record addresses"
-  type        = list(string)
-  default     = []
+  description = "the algorithm to use for rfc2136"
+  type        = string
+  default     = ""
+}
+variable "domain" {
+  description = "the DNS domain for records and certs"
+  type        = string
+  default     = ""
+}
+variable "pdns_api_key" {
+  description = "the API key for PowerDNS"
+  type        = string
+  default     = ""
+}
+variable "pdns_host" {
+  description = "the host address for PowerDNS"
+  type        = string
+  default     = ""
 }

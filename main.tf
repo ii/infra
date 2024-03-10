@@ -1,5 +1,5 @@
 module "sharing-io" {
-  source = "./terraform/equinix-metal-talos-cluster-with-ccm"
+  source = "./terraform/equinix-metal-talos-cluster"
 
   cluster_name             = "sharing-io"
   kube_apiserver_domain    = "k8s.sharing.io"

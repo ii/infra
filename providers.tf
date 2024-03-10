@@ -69,11 +69,7 @@ provider "dns" {
   }
 }
 provider "kubernetes" {
-  alias = "sharing-io"
-  # config_path = "./tmp/sharing.io-kubeconfig"
-  # This works when the DNS & IP address all work
-  # host                   = module.sharing-io.kubeconfig.kubernetes_client_configuration.host
-  # This will allow us to reach the first node directl
+  alias                  = "sharing-io"
   host                   = "https://${module.sharing-io.kubeconfig.node}:6443"
   client_certificate     = base64decode(module.sharing-io.kubeconfig.kubernetes_client_configuration.client_certificate)
   client_key             = base64decode(module.sharing-io.kubeconfig.kubernetes_client_configuration.client_key)
@@ -86,11 +82,6 @@ provider "flux" {
     client_certificate     = base64decode(module.sharing-io.kubeconfig.kubernetes_client_configuration.client_certificate)
     client_key             = base64decode(module.sharing-io.kubeconfig.kubernetes_client_configuration.client_key)
     cluster_ca_certificate = base64decode(module.sharing-io.kubeconfig.kubernetes_client_configuration.ca_certificate)
-    # host                   = module.kubeconfig.host
-    # client_certificate     = module.kubeconfig.client_certificate
-    # client_key             = module.kubeconfig.client_key
-    # cluster_ca_certificate = module.kubeconfig.cluster_ca_certificate
-    #config_path = "./tmp/${var.cluster_name}-kubeconfig"
   }
   git = {
     url = "ssh://git@github.com/${var.github_org}/${var.github_repository}.git"
