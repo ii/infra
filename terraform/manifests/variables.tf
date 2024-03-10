@@ -77,9 +77,29 @@ variable "domain" {
   type        = string
   default     = ""
 }
-
 variable "cluster_name" {
   description = "A name to provide for the Talos cluster"
   type        = string
   default     = "a-very-cool-cluster"
+}
+variable "coder_oauth2_github_client_id" {
+  description = "Authenticating Coder directly to github (bypassing authentik)"
+  type        = string
+}
+variable "coder_oauth2_github_client_secret" {
+  description = "Authenticating Coder directly to github (bypassing authentik)"
+  type        = string
+}
+variable "coder_gitauth_0_client_id" {
+  description = "Retrieving a RW token to save prs / commits etc in workspaces"
+  type        = string
+}
+variable "coder_gitauth_0_client_secret" {
+  description = "Retrieving a RW token to save prs / commits etc in workspaces"
+  type        = string
+}
+
+variable "metal_auth_token" {
+  description = "For creating coder workspaces on hardware"
+  type        = string
 }
