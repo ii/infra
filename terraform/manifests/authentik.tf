@@ -61,7 +61,7 @@ resource "kubernetes_secret_v1" "authentik_env" {
   ]
 }
 
-resource "kubernetes_config_map" "authentik-env" {
+resource "kubernetes_config_map" "authentik_env" {
   metadata {
     name      = "authentik-env"
     namespace = "authentik"

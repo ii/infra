@@ -35,7 +35,7 @@ resource "random_bytes" "tunneld_key" {
   length = 32
 }
 
-resource "kubernetes_config_map" "configmap" {
+resource "kubernetes_config_map" "coder_kustomize" {
   metadata {
     name      = "coder-kustomize"
     namespace = "flux-system"
@@ -78,7 +78,7 @@ resource "kubernetes_secret_v1" "coder" {
   ]
 }
 
-resource "kubernetes_config_map" "configmap" {
+resource "kubernetes_config_map" "coder_config" {
   metadata {
     name      = "coder-config"
     namespace = "coder"
