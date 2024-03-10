@@ -30,14 +30,16 @@ spec:
         externalTrafficPolicy: Local
       ingress:
         enable: true
+        host: "coder.sharing.io"
+        wildCardHost: "*.sharing.io"
+        # host: "${CODER_HOST}"
+        # wildCardHost: "*.${CODER_WILDCARD_DOMAIN}"
         # This ingress part of the chart needs wildcard love!
         className: nginx
         tls:
           enable: true
           secretName: wildcard-tls
           wildcardSecretName: wildcard-tls
-        host: "${CODER_HOST}"
-        wildCardHost: "*.${CODER_WILDCARD_DOMAIN}"
         service:
           type: ClusterIP
         annotations:
