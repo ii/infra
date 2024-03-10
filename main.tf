@@ -59,9 +59,16 @@ module "sharing-io-manifests" {
   domain                   = "sharing.io"
   pdns_host                = var.pdns_host
   pdns_api_key             = var.pdns_api_key
-
+  # for coder to directly authenticate via github
+  coder_oauth2_github_client_id     = var.coder_oauth2_github_client_id
+  coder_oauth2_github_client_secret = var.coder_oauth2_github_client_secret
+  # for coder to create gh tokens for rw within workspaces
+  coder_gitauth_0_client_id     = var.coder_gitauth_0_client_id
+  coder_gitauth_0_client_secret = var.coder_gitauth_0_client_secret
+  metal_auth_token              = var.metal_auth_token
   providers = {
     kubernetes = kubernetes.sharing-io
+    random     = random
   }
   depends_on = [module.sharing-io]
 }
@@ -76,13 +83,16 @@ module "sharing-io-flux-bootstrap" {
 
   providers = {
     github = github
+    flux   = flux.sharing-io
   }
+  depends_on = [module.sharing-io-manifests]
 }
 
 module "sharing-io-flux-github-webhook" {
   source = "./terraform/flux-github-webhook"
 
-  repo   = "${var.github_org}/${var.github_repository}"
+  repo = var.github_repository
+  # repo   = "${var.github_org}/${var.github_repository}"
   domain = "sharing.io"
   secret = module.sharing-io-manifests.flux_receiver_token
 
