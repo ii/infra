@@ -71,7 +71,7 @@ resource "kubernetes_secret_v1" "coder" {
     CODER_GITAUTH_0_CLIENT_SECRET     = var.coder_gitauth_0_client_secret
     CODER_OIDC_CLIENT_ID              = random_string.authentik_coder_oidc_client_id.result
     CODER_OIDC_CLIENT_SECRET          = random_string.authentik_coder_oidc_client_secret.result
-    METAL_AUTH_TOKEN                  = var.metal_auth_token
+    METAL_AUTH_TOKEN                  = var.equinix_metal_auth_token
     TF_VAR_metal_project              = var.equinix_metal_project_id
     # GITHUB_TOKEN                      = ""
   }

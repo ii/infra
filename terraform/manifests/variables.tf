@@ -98,8 +98,3 @@ variable "coder_gitauth_0_client_secret" {
   description = "Retrieving a RW token to save prs / commits etc in workspaces"
   type        = string
 }
-
-variable "metal_auth_token" {
-  description = "For creating coder workspaces on hardware"
-  type        = string
-}

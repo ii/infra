@@ -65,7 +65,6 @@ module "sharing-io-manifests" {
   # for coder to create gh tokens for rw within workspaces
   coder_gitauth_0_client_id     = var.coder_gitauth_0_client_id
   coder_gitauth_0_client_secret = var.coder_gitauth_0_client_secret
-  metal_auth_token              = var.metal_auth_token
   providers = {
     kubernetes = kubernetes.sharing-io
     random     = random

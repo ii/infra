@@ -91,7 +91,3 @@ variable "coder_gitauth_0_client_secret" {
   type        = string
   default     = ""
 }
-variable "metal_auth_token" {
-  description = "For creating coder workspaces on hardware"
-  type        = string
-}
