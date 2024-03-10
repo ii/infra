@@ -125,7 +125,7 @@ resource "kubernetes_config_map" "coder_config" {
     CODER_DISABLE_PASSWORD_AUTH   = "false"
     TF_VAR_metal_project          = "82b5c425-8dd4-429e-ae0d-d32f265c63e4"
     # CODER_OAUTH2_GITHUB_ALLOW_SIGNUPS = "true"
-    # CODER_OAUTH2_GITHUB_ALLOW_EVERYONE = "true"
+    CODER_OAUTH2_GITHUB_ALLOW_EVERYONE = "true"
     # CODER_OAUTH2_GITHUB_ALLOWED_ORGS = "ii,coder,kubermatic"
     # CODER_OIDC_USERNAME_FIELD = "preferred_username"
     # CODER_OIDC_EMAIL_DOMAIN = "ii.coop,cncf.io,linuxfoundation.org"
