@@ -4,7 +4,17 @@ output "sharing-io-talosconfig" {
 }
 
 output "sharing-io-kubeconfig" {
-  value     = module.sharing-io.kubeconfig
+  value     = module.sharing-io.kubeconfig.kubeconfig_raw
+  sensitive = true
+}
+
+output "sharing-io-akadmin-password" {
+  value     = module.sharing-io-manifests.authentik_bootstrap_password
+  sensitive = true
+}
+
+output "sharing-io-akadmin-token" {
+  value     = module.sharing-io-manifests.authentik_bootstrap_token
   sensitive = true
 }
 
