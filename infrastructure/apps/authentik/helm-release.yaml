@@ -15,29 +15,22 @@ spec:
   chart:
     spec:
       chart: authentik
-      # version: "2023.6.3" # Current as of August 20, 2023
-      # WARNING: PostgreSQL is updated from 11 to 15 in 2023.8.1
       version: "2024.2.2"
       sourceRef:
         kind: HelmRepository
         name: authentik
         namespace: flux-system
       interval: 12h
-  # Quite a refactor three months ago: https://github.com/goauthentik/helm/pull/163
-  # https://artifacthub.io/packages/helm/goauthentik/authentik#values
-  # # -- see configuration options at https://goauthentik.io/docs/installation/configuration/
-  #  postgresql-password: A
-  #  postgresql-postgres-password: B
   values:
     # https://github.com/goauthentik/helm/blob/c51952b024451ee90fc3603fae24f39472b1b197/charts/authentik/templates/server-deployment.yaml#L77
     # https://github.com/goauthentik/helm/blob/c51952b024451ee90fc3603fae24f39472b1b197/charts/authentik/templates/worker-deployment.yaml#L80
     global:
       envFrom:
+        - configMapRef:
+            name: authentik-env
         - secretRef:
             name: authentik-env
       env:
-        - name: AUTHENTIK_BOOTSTRAP_EMAIL
-          value: sharing.io@ii.coop
         - name: AUTHENTIK_ERROR_REPORTING__ENABLED
           value: "true"
     server:
@@ -49,62 +42,17 @@ spec:
         tls:
           - secretName: authentik-tls
             hosts:
-              - sso.sharing.io
+              - ${authentik_host}
         hosts:
-          - sso.sharing.io
+          - ${authentik_host}
         paths:
           - "/"
         pathType: Prefix
-    #   AUTHENTIK_SECRET_KEY:
-    #     secretKeyRef:
-    #       name: authentik-env
-    #       key: AUTHENTIK_SECRET_KEY
-    #   AUTHENTIK_BOOTSTRAP_PASSWORD:
-    #     secretKeyRef:
-    #       name: authentik-env
-    #       key: AUTHENTIK_BOOTSTRAP_PASSWORD
-    #   AUTHENTIK_BOOTSTRAP_TOKEN:
-    #     secretKeyRef:
-    #       name: authentik-env
-    #       key: AUTHENTIK_BOOTSTRAP_TOKEN
-    #   POSTGRES_PASSWORD:
-    #     secretKeyRef:
-    #       name: authentik-postgresql
-    #       key: postgresql-password
-      # Set the email address for the default akadmin user.
-      # https://goauthentik.io/docs/installation/automated-install#authentik_bootstrap_email
-      # - name: AUTHENTIK_SECRET_KEY
-      #   valueFrom:
-      #     secretKeyRef:
-      #       name: authenik-env
-      #       key: AUTHENTIK_SECRET_KEY
-      # - name: AUTHENTIK_BOOTSTRAP_PASSWORD
-      #   valueFrom:
-      #     secretKeyRef:
-      #       name: authenik-env
-      #       key: AUTHENTIK_BOOTSTRAP_PASSWORD
-      # - name: AUTHENTIK_BOOTSTRAP_TOKEN
-      #   valueFrom:
-      #     secretKeyRef:
-      #       name: authenik-env
-      #       key: AUTHENTIK_BOOTSTRAP_TOKEN
-      # https://goauthentik.io/integrations/services/powerdns-admin/
-    # While this works, I wantted to be more exlplicit, so we moved to envValueFrom above
-    # envFrom:
-    #   # We may need the cm to exist beforehand, we don't really need it so disabling for now
-    #   # configMapRef:
-    #   #   name: authentik-env
-    #   - secretRef:
-    #       name: authentik-env
     authentik:
       # Debugging
       log_level: trace
       error_reporting:
         enabled: true
-      # secret_key: "BJRl0HKI7i3T0XZOQiBYm9kDsx9WgzhaeiDAyyAq753MudVlcJ"
-      # postgresql:
-      #   password: "/erJXa5usdMmtWoR3/rbmhjWNjg1/neSpjn2E8ipme0/znHP"
-      # Let's figure a way to store this better
       # This sends anonymous usage-data, stack traces on errors and
       # performance data to sentry.io, and is fully opt-in
     postgresql:
@@ -114,12 +62,20 @@ spec:
         secretKeys:
           adminPasswordKey: AUTHENTIK_POSTGRESQL__PASSWORD
           userPasswordKey: AUTHENTIK_POSTGRESQL__PASSWORD
-      # As part of the upgrade from Postgres 11 to 15:
-      # https://goauthentik.io/docs/troubleshooting/postgres/upgrade_kubernetes#:~:text=Stop%20PostgreSQL%20and%20start%20the%20upgrade%E2%80%8B&text=Now%20run%20helm%20upgrade%20%2D%2D,repeat%20the%20steps%20from%20Prerequisites.
-      # While in diagnosticMode we can manipulate the data
-      # diagnosticMode:
-      #   enabled: true
-      # image:
-      #   tag: 15.2.0-debian-11-r26
     redis:
       enabled: true
+# version: "2023.6.3" # Current as of August 20, 2023
+# WARNING: PostgreSQL is updated from 11 to 15 in 2023.8.1
+# Quite a refactor three months ago: https://github.com/goauthentik/helm/pull/163
+# https://artifacthub.io/packages/helm/goauthentik/authentik#values
+# # -- see configuration options at https://goauthentik.io/docs/installation/configuration/
+#  postgresql-password: A
+#  postgresql-postgres-password: B
+# As part of the upgrade from Postgres 11 to 15:
+# https://goauthentik.io/docs/troubleshooting/postgres/upgrade_kubernetes#:~:text=Stop%20PostgreSQL%20and%20start%20the%20upgrade%E2%80%8B&text=Now%20run%20helm%20upgrade%20%2D%2D,repeat%20the%20steps%20from%20Prerequisites.
+# While in diagnosticMode we can manipulate the data
+# postgresql:
+# diagnosticMode:
+#   enabled: true
+# image:
+#   tag: 15.2.0-debian-11-r26
