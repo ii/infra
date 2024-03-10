@@ -31,4 +31,4 @@ spec:
   postBuild:
     substituteFrom:
       - kind: ConfigMap
-        name: coder-kustomize
+        name: coder-config
