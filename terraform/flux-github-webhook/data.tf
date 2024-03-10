@@ -1,10 +1,3 @@
-data "kubernetes_secret_v1" "receiver_token" {
-  metadata {
-    name      = "receiver-token"
-    namespace = "flux-system"
-  }
-}
-
 data "kubernetes_resource" "receiver" {
   api_version = "notification.toolkit.fluxcd.io/v1"
   kind        = "Receiver"
@@ -15,6 +8,6 @@ data "kubernetes_resource" "receiver" {
   }
 }
 
-data "github_repository" "self" {
-  full_name = var.repo
-}
+# data "github_repository" "self" {
+#   full_name = var.repo
+# }

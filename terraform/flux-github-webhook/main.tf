@@ -1,5 +1,5 @@
 resource "github_repository_webhook" "flux_webhook" {
-  repository = data.github_repository.self.name
+  repository = var.repo
 
   configuration {
     url          = "https://flux-webhook.${var.domain}${data.kubernetes_resource.receiver.object.status.webhookPath}"
