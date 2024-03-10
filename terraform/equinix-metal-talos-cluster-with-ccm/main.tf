@@ -81,7 +81,7 @@ resource "talos_machine_configuration_apply" "cp" {
          extraKernelArgs:
             - console=console=ttyS1,115200n8
          wipe: false
-         image: factory.talos.dev/installer/c7386c667d7b70374222de2cf9403bf24922a0bb8df4a0df6b4ae169320f0139:v1.6.6
+         image: factory.talos.dev/installer/5cf0d58ea18983ce77fecf95b4a2f0a36143b4008ccff308cac995a18fbb27db:v1.6.6
          # image: ghcr.io/siderolabs/installer:v1.6.6
          # extensions:
          #   - image: ghcr.io/siderolabs/gvisor:20231214.0-v1.6.6
