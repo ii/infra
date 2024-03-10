@@ -20,6 +20,8 @@ spec:
       interval: 12h
   values:
     coder:
+      env:
+        CODER_ACCESS_URL: "${CODER_ACCESS_URL}"
       envFrom:
       - configMapRef:
           name: coder-config
