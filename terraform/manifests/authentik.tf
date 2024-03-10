@@ -69,7 +69,19 @@ resource "kubernetes_config_map" "authentik-env" {
 
   data = {
     AUTHENTIK_BOOTSTRAP_EMAIL = "sharing.io@ii.coop"
-    AUTHENTIK_HOST            = "sso.sharing.io"
+  }
+  depends_on = [
+    kubernetes_namespace.authentik
+  ]
+}
+resource "kubernetes_config_map" "authentik-kustomize" {
+  metadata {
+    name      = "authentik-kustomize"
+    namespace = "flux-system"
+  }
+
+  data = {
+    authentik_host = "sso.sharing.io"
   }
   depends_on = [
     kubernetes_namespace.authentik
