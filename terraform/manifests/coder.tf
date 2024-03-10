@@ -45,6 +45,7 @@ resource "kubernetes_config_map" "coder_kustomize" {
     CODER_HOST            = "coder.sharing.io"
     CODER_ACCESS_URL      = "https://coder.${var.domain}"
     CODER_WILDCARD_DOMAIN = "sharing.io"
+    CODER_VERSION         = "2.8.5" # Lastest as of March 9th 2024
   }
   depends_on = [
     kubernetes_namespace.flux-system
