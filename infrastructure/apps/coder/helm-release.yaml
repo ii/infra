@@ -29,12 +29,13 @@ spec:
         type: ClusterIP
         externalTrafficPolicy: Local
       ingress:
-        enable: false
+        enable: true
         # This ingress part of the chart needs wildcard love!
         className: nginx
         tls:
           enable: true
-          # wildcardSecretName:
+          secretName: wildcard-tls
+          wildcardSecretName: wildcard-tls
         host: "${CODER_HOST}"
         wildCardHost: "*.${CODER_WILDCARD_DOMAIN}"
         service:
