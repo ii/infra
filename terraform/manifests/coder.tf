@@ -115,9 +115,9 @@ resource "kubernetes_config_map" "coder_config" {
     CODER_OIDC_GROUP_REGEX_FILTER = "^Coder.*$"
     CODER_OIDC_SCOPES             = "openid,profile,email,groups"
     TF_LOG                        = "debug"
-    CODER_VERBOSE                 = "true"
     CODER_OIDC_USER_ROLE_FIELD    = "groups" # https://coder.com/docs/v2/latest/admin/auth#role-sync-enterprise
     CODER_OIDC_USER_ROLE_MAPPING  = <<-EOT
+    # CODER_VERBOSE                 = "true"
             {
               "authentik Admins": [ "owner", "template-admin", "user-admin", "auditor" ]
             }
