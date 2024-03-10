@@ -21,10 +21,10 @@ spec:
   values:
     coder:
       envFrom:
-        - configMapRef:
-          name: coder-config
-        - secretRef:
-          name: coder-config
+      - configMapRef:
+        name: coder-config
+      - secretRef:
+        name: coder-config
       service:
         type: ClusterIP
         externalTrafficPolicy: Local
