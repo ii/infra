@@ -43,6 +43,7 @@ resource "kubernetes_config_map" "coder_kustomize" {
 
   data = {
     CODER_HOST            = "coder.sharing.io"
+    CODER_ACCESS_URL      = "https://coder.${var.domain}"
     CODER_WILDCARD_DOMAIN = "sharing.io"
   }
   depends_on = [
@@ -71,6 +72,7 @@ resource "kubernetes_secret_v1" "coder" {
     CODER_OIDC_CLIENT_ID              = random_string.authentik_coder_oidc_client_id.result
     CODER_OIDC_CLIENT_SECRET          = random_string.authentik_coder_oidc_client_secret.result
     METAL_AUTH_TOKEN                  = var.metal_auth_token
+    TF_VAR_metal_project              = var.equinix_metal_project_id
     # GITHUB_TOKEN                      = ""
   }
   depends_on = [
@@ -85,45 +87,44 @@ resource "kubernetes_config_map" "coder_config" {
   }
 
   data = {
-    CODER_HOST                    = "coder.sharing.io"
-    CODER_ACCESS_URL              = "https://coder.sharing.io"
-    CODER_WILDCARD_DOMAIN         = "sharing.io"
-    CODER_OIDC_SIGN_IN_TEXT       = "Sign in with sso.sharing.io"
-    CODER_OIDC_ISSUER_URL         = "https://sso.sharing.io/application/o/coder/"
-    TUNNEL_ACCESS_URL             = "https://try.sharing.io"
-    TUNNEL_WILDCARD_DOMAIN        = "try.sharing.io"
-    CODER_SSH_KEYGEN_ALGORITHM    = "ed25519"
-    CODER_PROVISIONER_DAEMONS     = "50"
-    CODER_USERNAME                = "coder"
-    CODER_EMAIL                   = "coder@ii.coop" # used by /opt/coder server create-admin-user
-    CODER_ACCESS_URL              = "https://coder.sharing.io"
-    CODER_WILDCARD_ACCESS_URL     = "*.sharing.io"
-    CODER_SWAGGER_ENABLE          = "true"
-    CODER_PROMETHEUS_ADDRESS      = "0.0.0.0:2112"
-    CODER_TELEMETRY               = "false"
-    CODER_GITAUTH_0_ID            = "github"
-    CODER_GITAUTH_0_TYPE          = "github"
-    CODER_GITAUTH_0_SCOPES        = "repo"            # write:gpg_key"
-    CODER_OIDC_SIGN_IN_TEXT       = "sso.company.com" # authentik as OIDC
-    CODER_OIDC_ISSUER_URL         = "https:sso.company.com/application/o/codercontainer/"
-    CODER_OIDC_ICON_URL           = "https://goauthentik.io/img/icon.png"
-    CODER_OIDC_GROUP_FIELD        = "groups" #  https://coder.com/docs/v2/latest/admin/auth#group-sync-enterprise
-    CODER_OIDC_GROUP_MAPPING      = <<-EOT
-           {"authentik Admins": "Coder Admins"}
-           EOT
-    CODER_OIDC_GROUP_AUTO_CREATE  = "true"
-    CODER_OIDC_GROUP_REGEX_FILTER = "^Coder.*$"
-    CODER_OIDC_SCOPES             = "openid,profile,email,groups"
-    TF_LOG                        = "debug"
-    CODER_OIDC_USER_ROLE_FIELD    = "groups" # https://coder.com/docs/v2/latest/admin/auth#role-sync-enterprise
-    CODER_OIDC_USER_ROLE_MAPPING  = <<-EOT
-    # CODER_VERBOSE                 = "true"
-            {
-              "authentik Admins": [ "owner", "template-admin", "user-admin", "auditor" ]
-            }
-            EOT
-    CODER_DISABLE_PASSWORD_AUTH   = "false"
-    TF_VAR_metal_project          = "82b5c425-8dd4-429e-ae0d-d32f265c63e4"
+    CODER_HOST                 = "coder.${var.domain}"
+    CODER_ACCESS_URL           = "https://coder.${var.domain}"
+    CODER_OIDC_SIGN_IN_TEXT    = "Sign in with sso.${var.domain}"
+    CODER_OIDC_ISSUER_URL      = "https://sso.${var.domain}/application/o/coder/"
+    TUNNEL_ACCESS_URL          = "https://try.${var.domain}"
+    TUNNEL_WILDCARD_DOMAIN     = "try.${var.domain}"
+    CODER_SSH_KEYGEN_ALGORITHM = "ed25519"
+    CODER_PROVISIONER_DAEMONS  = "50"
+    CODER_USERNAME             = "coder"
+    CODER_EMAIL                = "coder@ii.coop" # used by /opt/coder server create-admin-user
+    CODER_ACCESS_URL           = "https://coder.${var.domain}"
+    CODER_WILDCARD_DOMAIN      = "${var.domain}"
+    CODER_WILDCARD_ACCESS_URL  = "*.${var.domain}"
+    CODER_SWAGGER_ENABLE       = "true"
+    CODER_TELEMETRY            = "false"
+    CODER_GITAUTH_0_ID         = "github"
+    CODER_GITAUTH_0_TYPE       = "github"
+    CODER_GITAUTH_0_SCOPES     = "repo" # write:gpg_key"
+    # CODER_PROMETHEUS_ADDRESS   = "0.0.0.0:2112"
+    # CODER_OIDC_SIGN_IN_TEXT       = "Sign in with sso.${var.domain}" # authentik as OIDC
+    # CODER_OIDC_ISSUER_URL         = "https://sso.${var.domain}/application/o/codercontainer/"
+    # CODER_OIDC_ICON_URL           = "https://goauthentik.io/img/icon.png"
+    # CODER_OIDC_GROUP_FIELD        = "groups" #  https://coder.com/docs/v2/latest/admin/auth#group-sync-enterprise
+    # CODER_OIDC_GROUP_MAPPING      = <<-EOT
+    #        {"authentik Admins": "Coder Admins"}
+    #        EOT
+    # CODER_OIDC_GROUP_AUTO_CREATE  = "true"
+    # CODER_OIDC_GROUP_REGEX_FILTER = "^Coder.*$"
+    # CODER_OIDC_SCOPES             = "openid,profile,email,groups"
+    # TF_LOG                        = "debug"
+    # # CODER_VERBOSE                 = "true"
+    # CODER_OIDC_USER_ROLE_FIELD   = "groups" # https://coder.com/docs/v2/latest/admin/auth#role-sync-enterprise
+    # CODER_OIDC_USER_ROLE_MAPPING = <<-EOT
+    #         {
+    #           "authentik Admins": [ "owner", "template-admin", "user-admin", "auditor" ]
+    #         }
+    #         EOT
+    CODER_DISABLE_PASSWORD_AUTH = "false"
     # CODER_OAUTH2_GITHUB_ALLOW_SIGNUPS = "true"
     CODER_OAUTH2_GITHUB_ALLOW_EVERYONE = "true"
     # CODER_OAUTH2_GITHUB_ALLOWED_ORGS = "ii,coder,kubermatic"
