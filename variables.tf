@@ -61,3 +61,37 @@ variable "acme_email_address" {
   type        = string
   default     = ""
 }
+variable "authentik_github_oauth_app_id" {
+  description = "Github OAUTH app id"
+  type        = string
+  default     = ""
+}
+variable "authentik_github_oauth_app_secret" {
+  description = "Github OAUTH app secrets"
+  type        = string
+  default     = ""
+}
+variable "coder_oauth2_github_client_id" {
+  description = "Authenticating Coder directly to github (bypassing authentik)"
+  type        = string
+  default     = ""
+}
+variable "coder_oauth2_github_client_secret" {
+  description = "Authenticating Coder directly to github (bypassing authentik)"
+  type        = string
+  default     = ""
+}
+variable "coder_gitauth_0_client_id" {
+  description = "Retrieving a RW token to save prs / commits etc in workspaces"
+  type        = string
+  default     = ""
+}
+variable "coder_gitauth_0_client_secret" {
+  description = "Retrieving a RW token to save prs / commits etc in workspaces"
+  type        = string
+  default     = ""
+}
+variable "metal_auth_token" {
+  description = "For creating coder workspaces on hardware"
+  type        = string
+}
