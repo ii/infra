@@ -42,9 +42,9 @@ spec:
         tls:
           - secretName: authentik-tls
             hosts:
-              - sso.sharing.io
+              - "${authentik_host}"
         hosts:
-          - sso.sharing.io
+          - "${authentik_host}"
         paths:
           - "/"
         pathType: Prefix
