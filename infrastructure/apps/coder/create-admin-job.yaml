@@ -1,0 +1,22 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: create-admin
+  namespace: coder
+spec:
+  # parallelism: 1
+  # completions: 1
+  # backoffLimit: 4
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: create-admin
+          image: "ghcr.io/coder/coder:v${CODER_VERSION}"
+          command: ["/opt/coder", "server", "create-admin-user"]
+          envFrom:
+            # used by /opt/coder server create-admin-user
+            - configMapRef:
+                name: coder-config
+            - secretRef:
+                name: coder-config
