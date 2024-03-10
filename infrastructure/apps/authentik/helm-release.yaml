@@ -42,9 +42,9 @@ spec:
         tls:
           - secretName: authentik-tls
             hosts:
-              - "${authentik_host}"
+              - "${AUTHENTIK_HOST}"
         hosts:
-          - "${authentik_host}"
+          - "${AUTHENTIK_HOST}"
         paths:
           - "/"
         pathType: Prefix

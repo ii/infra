@@ -15,4 +15,4 @@ spec:
   postBuild:
     substituteFrom:
       - kind: ConfigMap
-        name: authentik-kustomize
+        name: authentik-env
