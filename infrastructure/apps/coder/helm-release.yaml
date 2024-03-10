@@ -24,8 +24,10 @@ spec:
       env:
       #  https://github.com/coder/coder/blob/v2.8.5/helm/coder/templates/service.yaml#L32-L49
       # We do not support `valueFrom` for this env var specifically
-        CODER_PROMETHEUS_ENABLE: "true"
-        CODER_ACCESS_URL: "${CODER_ACCESS_URL}"
+        - name: CODER_PROMETHEUS_ENABLE
+          value: "true"
+        - name: CODER_ACCESS_URL
+          value: "${CODER_ACCESS_URL}"
       envFrom:
       - configMapRef:
           name: coder-config
