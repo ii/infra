@@ -10,3 +10,9 @@ output "authentik_bootstrap_password" {
 output "authentik_secret_key" {
   value = random_string.authentik_secret_key.result
 }
+output "authentik_coder_oidc_client_id" {
+  value = random_string.authentik_coder_oidc_client_id.result
+}
+output "authentik_coder_oidc_client_secret" {
+  value = random_string.authentik_coder_oidc_client_secret.result
+}
