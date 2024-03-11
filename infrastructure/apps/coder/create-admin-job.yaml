@@ -14,7 +14,7 @@ spec:
         - name: create-admin
           # image: "ghcr.io/coder/coder:v2.8.5"
           image: "ghcr.io/coder/coder:v${CODER_VERSION}"
-          command: ["/opt/coder", "login", "https://coder"]
+          command: ["/opt/coder", "login", "http://coder"]
           envFrom:
             - configMapRef:
                 name: coder-config
