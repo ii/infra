@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-web
+  namespace: powerdns
+spec:
+  type: ClusterIP
+  ports:
+    - name: auth-web
+      port: 8081
+      protocol: TCP
+      targetPort: 8081
+  selector:
+    powerdns: auth
+  sessionAffinity: None

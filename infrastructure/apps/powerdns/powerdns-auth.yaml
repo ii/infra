@@ -1,0 +1,62 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth
+  namespace: powerdns
+  labels:
+    powerdns: auth
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      powerdns: auth
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        powerdns: auth
+    spec:
+      # By default port 53 needs to be opened by root
+      # We might be able to fix this via CAPABILITIES
+      securityContext:
+        runAsUser: 0
+        runAsGroup: 0
+      #   fsGroup: 2000
+      restartPolicy: Always
+      containers:
+        - name: auth
+          image: powerdns/pdns-auth-48:4.8.1
+          ports:
+            - containerPort: 53
+              protocol: UDP
+            - containerPort: 53
+            - containerPort: 8081
+          envFrom:
+            - configMapRef:
+                name: powerdns-config
+            - secretRef:
+                name: powerdns-config
+            - secretRef:
+                name: powerdns-override
+                optional: true
+          volumeMounts:
+            - mountPath: /etc/powerdns/pdns.conf
+              name: jinja-templates
+              subPath: pdns.conf
+            - mountPath: /etc/powerdns/templates.d
+              name: jinja-templates
+              readOnly: false
+          resources: {}
+
+          lifeCycle:
+            # from  https://github.com/aescanero/helm-charts/blob/76fcfc3de2db248acaa73c9a1c7572c19bf96504/charts/powerdns/templates/powerdns-deployment.yaml#L36-L42 postStart:
+            postStart:
+              exec:
+                command:
+                  - "touch"
+                  - "/tmp/poststart"
+      volumes:
+        - name: jinja-templates
+          configMap:
+            name: jinja-templates

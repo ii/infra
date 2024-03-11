@@ -1,0 +1,71 @@
+apiVersion: v1
+data:
+  _api.j2: |
+    webserver
+    api
+    api-key={{ PDNS_AUTH_API_KEY }}
+    webserver-address=0.0.0.0
+    webserver-allow-from=0.0.0.0/0
+    webserver-password={{ PDNS_AUTH_API_KEY }}
+  dnsupdate.j2: |
+    dnsupdate=yes
+    allow-dnsupdate-from=0.0.0.0/0
+  gpsql.j2: |
+    launch=gpgsql
+    gpgsql-dnssec={{ PDNS_gpsql_dnssec }}
+    gpgsql-host={{ PDNS_gpsql_host }}
+    gpgsql-dbname={{ PDNS_gpsql_dbname }}
+    gpgsql-user={{ PDNS_gpsql_user }}
+    gpgsql-password={{ PDNS_gpsql_password }}
+  pdns-poststart.py: |
+    #!/usr/bin/env python3
+    import os
+
+    from powerdnsadmin import create_app
+    from powerdnsadmin.models.base import db
+    from powerdnsadmin.models.user import User, Role
+    from powerdnsadmin.models.domain import Domain
+    from powerdnsadmin.models.setting import Setting
+
+    app = create_app()
+    ctx = app.app_context()
+    ctx.push()
+
+    db.session.add(Setting("pdns_api_key", os.environ["SECRET_KEY"]))
+    db.session.add(Setting("allow_user_create_domain", True))
+    db.session.add(Setting("otp_field_enabled", False))
+    db.session.add(Setting("session_timeout", 60))
+    db.session.add(Setting("site_name", os.environ["PDNS_SITE_NAME"]))
+    db.session.add(Setting("pdns_api_url", os.environ["PDNS_URL"]))
+    db.session.add(Setting("pdns_version", os.environ["PDNS_VERSION"]))
+
+    admin_user = os.environ["PDNS_ADMIN_USER"]
+    admin_pass = os.environ["PDNS_ADMIN_PASSWORD"]
+    admin_email = os.environ["PDNS_ADMIN_EMAIL"]
+    admin_user = User(
+        username=admin_user,
+        plain_text_password=admin_pass,
+        email=admin_email,
+        role_id=Role.query.filter_by(name="Administrator").first().id,
+    )
+    admin_user.create_local_user()
+    db.session.commit()
+
+    # Decided configuration for zones is better left with auth
+    # DNS Admin just needs admin users created
+    # for declared_domain in os.environ["PDNS_DOMAINS"].split(" "):
+    #     db.session.add(Domain(name=declared_domain))
+  pdns.conf: |
+    local-address=0.0.0.0,::
+    include-dir=/etc/powerdns/pdns.d
+    disable-syslog=true
+    loglevel=5
+    log-dns-details=yes
+    webserver-loglevel=detailed
+  soa-content.j2: |
+    default-soa-content=ns.{{ PRIMARY_DOMAIN }} hostmaster.{{ PRIMARY_DOMAIN }} 0 10800 3600 604800 3600
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: jinja-templates
+  namespace: powerdns

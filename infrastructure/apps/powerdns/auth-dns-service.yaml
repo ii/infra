@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-dns
+  namespace: powerdns
+spec:
+  type: LoadBalancer
+  allocateLoadBalancerNodePorts: true
+  externalTrafficPolicy: Cluster
+  internalTrafficPolicy: Cluster
+  sessionAffinity: None
+  selector:
+    powerdns: auth
+  externalIPs:
+    - ${DNS_IP:=136.144.49.79}
+  ports:
+    - name: dns-tcp
+      port: 53
+      protocol: TCP
+      targetPort: 53
+    - name: dns-udp
+      port: 53
+      protocol: UDP
+      targetPort: 53
