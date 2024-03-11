@@ -30,10 +30,10 @@ spec:
         - name: tunneld
           envFrom:
           - configMapRef:
-            name: coder-config
+              name: coder-config
           - secretRef:
-            name: coder-config
+              name: coder-config
           - secretRef:
-            name: coder-override
+              name: coder-override
           image:
             ghcr.io/ii/tunneld:0.1.10-sharing
