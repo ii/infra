@@ -1,15 +1,11 @@
-resource "random_string" "random" {
-  count   = var.controlplane_nodes
-  length  = 8
-  special = false
-  lower   = true
-  upper   = false
-  numeric = false
+resource "random_pet" "random" {
+  count  = var.controlplane_nodes
+  length = 2
 }
 
 resource "equinix_metal_device" "cp" {
-  for_each         = { for idx, val in random_string.random : idx => val }
-  hostname         = "${var.cluster_name}-${each.value.result}"
+  for_each         = { for idx, val in random_pet.random : idx => val }
+  hostname         = "${var.cluster_name}-${each.value.id}"
   plan             = var.equinix_metal_plan
   metro            = var.equinix_metal_metro
   operating_system = "custom_ipxe"
