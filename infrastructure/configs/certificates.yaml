@@ -25,6 +25,7 @@ spec:
   dnsNames:
     - "*.${domain}"
     - "${domain}"
+    - "whataboutthistime.${domain}"
   issuerRef:
     name: letsencrypt-rfc2136
     kind: ClusterIssuer
