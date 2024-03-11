@@ -44,6 +44,32 @@ module "sharing-io-record-ingress-ip" {
 
   depends_on = [module.sharing-io]
 }
+module "sharing-io-record-dns-ip" {
+  source = "./terraform/rfc2136-record-assign"
+
+  zone      = "sharing.io."
+  name      = "dns"
+  addresses = [module.sharing-io.cluster_dns_ip]
+
+  providers = {
+    dns = dns
+  }
+
+  depends_on = [module.sharing-io]
+}
+module "sharing-io-record-wireguard-ip" {
+  source = "./terraform/rfc2136-record-assign"
+
+  zone      = "sharing.io."
+  name      = "wireguard"
+  addresses = [module.sharing-io.cluster_wireguard_ip]
+
+  providers = {
+    dns = dns
+  }
+
+  depends_on = [module.sharing-io]
+}
 resource "local_sensitive_file" "sharingio-kubeconfig" {
   content  = module.sharing-io.kubeconfig.kubeconfig_raw
   filename = "./tmp/sharing-io-kubeconfig"

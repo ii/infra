@@ -16,6 +16,14 @@ output "cluster_ingress_ip" {
   value = equinix_metal_reserved_ip_block.cluster_ingress_ip.network
 }
 
+output "cluster_dns_ip" {
+  value = equinix_metal_reserved_ip_block.cluster_dns_ip.network
+}
+
+output "cluster_wireguard_ip" {
+  value = equinix_metal_reserved_ip_block.cluster_wireguard_ip.network
+}
+
 output "cluster_node0_ip" {
   value = { for idx, val in equinix_metal_device.cp : idx => val }[0].network.0.address
 }

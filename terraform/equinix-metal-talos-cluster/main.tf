@@ -37,6 +37,22 @@ resource "equinix_metal_reserved_ip_block" "cluster_ingress_ip" {
   tags       = ["eip-ingress-${var.cluster_name}"]
 }
 
+resource "equinix_metal_reserved_ip_block" "cluster_dns_ip" {
+  project_id = var.equinix_metal_project_id
+  type       = "public_ipv4"
+  metro      = var.equinix_metal_metro
+  quantity   = 1
+  tags       = ["eip-dns-${var.cluster_name}"]
+}
+
+resource "equinix_metal_reserved_ip_block" "cluster_wiregaurd_ip" {
+  project_id = var.equinix_metal_project_id
+  type       = "public_ipv4"
+  metro      = var.equinix_metal_metro
+  quantity   = 1
+  tags       = ["eip-wiregaurd-${var.cluster_name}"]
+}
+
 resource "talos_machine_secrets" "machine_secrets" {
   talos_version = var.talos_version
 }
