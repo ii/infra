@@ -41,6 +41,11 @@ variable "talos_version" {
   default     = "v1.6.5"
   description = "https://github.com/siderolabs/talos/releases"
 }
+variable "talos_install_image" {
+  type        = string
+  default     = "factory.talos.dev/installer/5cf0d58ea18983ce77fecf95b4a2f0a36143b4008ccff308cac995a18fbb27db:v1.6.6"
+  description = "https://github.com/siderolabs/talos/releases"
+}
 variable "kubernetes_version" {
   type        = string
   default     = "v1.29.2"

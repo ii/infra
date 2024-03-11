@@ -69,19 +69,21 @@ provider "dns" {
   }
 }
 provider "kubernetes" {
-  alias                  = "sharing-io"
-  host                   = "https://${module.sharing-io.kubeconfig.node}:6443"
-  client_certificate     = base64decode(module.sharing-io.kubeconfig.kubernetes_client_configuration.client_certificate)
-  client_key             = base64decode(module.sharing-io.kubeconfig.kubernetes_client_configuration.client_key)
-  cluster_ca_certificate = base64decode(module.sharing-io.kubeconfig.kubernetes_client_configuration.ca_certificate)
+  alias       = "sharing-io"
+  config_path = "./tmp/sharing.io-kubeconfig"
+  # host                   = "https://${module.sharing-io.kubeconfig.node}:6443"
+  # client_certificate     = base64decode(module.sharing-io.kubeconfig.kubernetes_client_configuration.client_certificate)
+  # client_key             = base64decode(module.sharing-io.kubeconfig.kubernetes_client_configuration.client_key)
+  # cluster_ca_certificate = base64decode(module.sharing-io.kubeconfig.kubernetes_client_configuration.ca_certificate)
 }
 provider "flux" {
   alias = "sharing-io"
   kubernetes = {
-    host                   = "https://${module.sharing-io.kubeconfig.node}:6443"
-    client_certificate     = base64decode(module.sharing-io.kubeconfig.kubernetes_client_configuration.client_certificate)
-    client_key             = base64decode(module.sharing-io.kubeconfig.kubernetes_client_configuration.client_key)
-    cluster_ca_certificate = base64decode(module.sharing-io.kubeconfig.kubernetes_client_configuration.ca_certificate)
+    config_path = "./tmp/sharing.io-kubeconfig"
+    # host                   = "https://${module.sharing-io.kubeconfig.node}:6443"
+    # client_certificate     = base64decode(module.sharing-io.kubeconfig.kubernetes_client_configuration.client_certificate)
+    # client_key             = base64decode(module.sharing-io.kubeconfig.kubernetes_client_configuration.client_key)
+    # cluster_ca_certificate = base64decode(module.sharing-io.kubeconfig.kubernetes_client_configuration.ca_certificate)
   }
   git = {
     url = "ssh://git@github.com/${var.github_org}/${var.github_repository}.git"

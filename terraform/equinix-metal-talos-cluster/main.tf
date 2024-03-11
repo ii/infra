@@ -81,7 +81,7 @@ resource "talos_machine_configuration_apply" "cp" {
          extraKernelArgs:
             - console=console=ttyS1,115200n8
          wipe: false
-         image: factory.talos.dev/installer/5cf0d58ea18983ce77fecf95b4a2f0a36143b4008ccff308cac995a18fbb27db:v1.6.6
+         image: ${var.talos_install_image}
        network:
          hostname: ${each.value.hostname}
          interfaces:

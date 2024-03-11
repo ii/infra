@@ -10,6 +10,7 @@ module "sharing-io" {
   kubernetes_version       = local.kubernetes_version
   ipxe_script_url          = local.ipxe_script_url
   controlplane_nodes       = 3
+  talos_install_image      = local.talos_install_image
 
   providers = {
     talos   = talos
