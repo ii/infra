@@ -36,3 +36,5 @@ spec:
               name: coder-override
           image:
             ghcr.io/ii/tunneld:0.1.10-sharing
+          ports:
+            - containerPort: 12345
