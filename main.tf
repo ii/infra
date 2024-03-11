@@ -111,23 +111,23 @@ module "sharing-io-flux-github-webhook" {
   depends_on = [module.sharing-io-manifests]
 }
 
-module "sharing-io-authentik-config" {
-  source                             = "./terraform/authentik-config"
-  github_oauth_app_id                = var.authentik_github_oauth_app_id
-  github_oauth_app_secret            = var.authentik_github_oauth_app_secret
-  authentik_coder_oidc_client_id     = module.sharing-io-manifests.authentik_coder_oidc_client_id
-  authentik_coder_oidc_client_secret = module.sharing-io-manifests.authentik_coder_oidc_client_secret
-  authentik_bootstrap_token          = module.sharing-io-manifests.authentik_bootstrap_token
-  # repo = var.github_repository
-  # # repo   = "${var.github_org}/${var.github_repository}"
-  # domain = "sharing.io"
-  # secret = module.sharing-io-manifests.flux_receiver_token
+# module "sharing-io-authentik-config" {
+#   source                             = "./terraform/authentik-config"
+#   github_oauth_app_id                = var.authentik_github_oauth_app_id
+#   github_oauth_app_secret            = var.authentik_github_oauth_app_secret
+#   authentik_coder_oidc_client_id     = module.sharing-io-manifests.authentik_coder_oidc_client_id
+#   authentik_coder_oidc_client_secret = module.sharing-io-manifests.authentik_coder_oidc_client_secret
+#   authentik_bootstrap_token          = module.sharing-io-manifests.authentik_bootstrap_token
+#   # repo = var.github_repository
+#   # # repo   = "${var.github_org}/${var.github_repository}"
+#   # domain = "sharing.io"
+#   # secret = module.sharing-io-manifests.flux_receiver_token
 
-  providers = {
-    authentik  = authentik
-    flux       = flux
-    kubernetes = kubernetes.sharing-io
-  }
+#   providers = {
+#     authentik  = authentik
+#     flux       = flux
+#     kubernetes = kubernetes.sharing-io
+#   }
 
-  depends_on = [module.sharing-io-manifests]
-}
+#   depends_on = [module.sharing-io-manifests]
+# }
