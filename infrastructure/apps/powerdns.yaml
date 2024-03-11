@@ -15,4 +15,4 @@ spec:
   postBuild:
     substituteFrom:
       - kind: ConfigMap
-        name: coder-kustomize
+        name: powerdns-kustomize

@@ -85,7 +85,7 @@ resource "kubernetes_config_map_v1" "powerdns-config" {
 resource "kubernetes_config_map_v1" "powerdns-kustomize" {
   metadata {
     name      = "powerdns-kustomize"
-    namespace = "powerdns"
+    namespace = "flux-system"
   }
 
   data = {
