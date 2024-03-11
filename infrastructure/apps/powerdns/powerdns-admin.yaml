@@ -121,9 +121,9 @@ spec:
   tls:
     - secretName: "powerdns-tls"
       hosts:
-        - "${DNSADMIN_INGRESS:=powerdns.example.com}"
+        - "${PDNS_ADMIN_INGRESS}"
   rules:
-    - host: "${DNSADMIN_INGRESS:=powerdns.example.com}"
+    - host: "${PDNS_ADMIN_INGRESS}"
       http:
         paths:
           - path: /

@@ -27,7 +27,7 @@ data:
     admin_email = os.environ["PDNS_ADMIN_EMAIL"]
     admin_user = User(
         username=admin_user,
-        plain_text_password=admin_pass,
+       plain_text_password=admin_pass,
         email=admin_email,
         role_id=Role.query.filter_by(name="Administrator").first().id,
     )
