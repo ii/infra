@@ -42,9 +42,9 @@ resource "kubernetes_config_map" "coder_kustomize" {
   }
 
   data = {
-    CODER_HOST              = "coder.sharing.io"
+    CODER_HOST              = "coder.${var.domain}"
     CODER_ACCESS_URL        = "https://coder.${var.domain}"
-    CODER_WILDCARD_DOMAIN   = "sharing.io"
+    CODER_WILDCARD_DOMAIN   = "coder.${var.domain}"
     CODER_VERSION           = "2.8.5" # Lastest as of March 9th 2024
     TUNNELD_WILDCARD_DOMAIN = "try.${var.domain}"
     wg_ip                   = var.wg_ip
