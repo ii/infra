@@ -7,6 +7,8 @@ metadata:
 spec:
   interval: 10m0s
   path: ./infrastructure/apps/authentik
+  dependOn:
+    - name: longhorn
   prune: true
   wait: true
   sourceRef:
