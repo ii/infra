@@ -60,100 +60,18 @@ spec:
               name: powerdns-admin
       restartPolicy: Always
       containers:
-        - env:
-            # https://github.com/PowerDNS-Admin/PowerDNS-Admin/blob/master/configs/docker_config.py
-            # OIDC_*, MAIL_*, SAML_*, SQLALCHEMY_*
-            - name: SQLALCHEMY_DATABASE_URI
-              valueFrom:
-                secretKeyRef:
-                  name: powerdns
-                  key: sql_url
-            - name: SQLALCHEMY_ENGINE_OPTIONS
-              # https://docs.sqlalchemy.org/en/20/core/engines.html
-              # echo{_pool} can also be debug
-              # https://docs.sqlalchemy.org/en/20/core/engines.html#sqlalchemy.create_engine.params.execution_options
-              # https://docs.sqlalchemy.org/en/20/core/connections.html#sqlalchemy.engine.Connection.execution_options
-              value: |-
-                {
-                  "echo": "True"
-                  "echo_pool": "True"
-                }
-            - name: SECRET_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: powerdns
-                  key: api_key
-            - name: PDNS_SITE_NAME
-              value: ${POWERDNS_INGRESS:=powerdns.example.com} Administration
-            - name: PDNS_URL
-              value: http://auth-web:8081
-            - name: PDNS_VERSION
-              value: 4.8.1
-            - name: PDNS_ZONES
-              value: |-
-                ${DNS_DOMAIN:=example.com}
-                container.${DNS_DOMAIN:=example.com}
-            - name: PDNS_ADMIN_USER
-              valueFrom:
-                secretKeyRef:
-                  name: powerdns
-                  key: admin_user
-            - name: PDNS_ADMIN_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: powerdns
-                  key: admin_password
-            - name: PDNS_ADMIN_EMAIL
-              valueFrom:
-                secretKeyRef:
-                  name: powerdns
-                  key: admin_email
-            # - name: SQLALCHEMY_DATABASE_URI
-            #   value: sqlite:////data/powerdns-admin.db
-            # https://goauthentik.io/integrations/services/powerdns-admin/
-            - name: SAML_CERT
-              value: "/saml.crt"
-            - name: SAML_METADATA_URL
-              value: ${SAML_URL:=https://sso.example.com}/application/saml/powerdns/metadata/
-            - name: SAML_LOGOUT_URL
-              value: ${SAML_URL:=https://sso.example.com}/application/saml/slo/powerdns/binding/redirect/
-            - name: SAML_DEBUG
-              value: "True"
-            - name: SAML_ENABLED
-              value: "True"
-            - name: SAML_PATH
-              value: os.path.join(os.path.dirname(file), 'saml')
-            - name: SAML_METADATA_CACHE_LIFETIME
-              value: "1"
-            - name: SAML_SP_ENTITY_ID
-              value: pdns-admin
-            - name: SAML_SP_CONTACT_NAME
-              value: Hippie Hacker
-            - name: SAML_SP_CONTACT_MAIL
-              value: hh@ii.coop
-            - name: SAML_NAMEID_FORMAT
-              value: urn:oasis:names:tc:SAML:2.0:nameid-format:persistent
-            - name: SAML_ATTRIBUTE_USERNAME
-              value: http://schemas.goauthentik.io/2021/02/saml/username
-            - name: SAML_ATTRIBUTE_NAME
-              value: http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name
-            - name: SAML_ATTRIBUTE_EMAIL
-              value: http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress
-            - name: SAML_ATTRIBUTE_GROUP
-              value: http://schemas.xmlsoap.org/claims/Group
-            - name: SAML_GROUP_ADMIN_NAME
-              value: ???
-            - name: SAML_SIGN_REQUEST
-              value: "False"
-            - name: SAML_ASSERTION_ENCRYPTED
-              value: "False"
-            - name: SAML_WANT_MESSAGE_SIGNED
-              value: "False"
           image: powerdnsadmin/pda-legacy:v0.3.0
           name: admin
           ports:
             - containerPort: 80
-          # https://github.com/PowerDNS-Admin/PowerDNS-Admin#option-2-using-docker-compose (port 9191 or 80?)
+          envFrom:
+            - configMapRef:
+                name: powerdns-config
+            - secretRef:
+                name: powerdns-config
+            - secretRef:
+                name: powerdns-override
+                optional: true
           livenessProbe:
             exec:
               command: ["/bin/sh", "-c", "nc -vz 127.0.0.1 80 2>/dev/null"]
@@ -164,9 +82,9 @@ spec:
             - mountPath: /app/pdns-poststart.py
               name: powerdns-config
               subPath: pdns-poststart.py
-            - mountPath: /saml.crt
-              name: powerdns-secrets
-              subPath: authentik_cert
+            # - mountPath: /saml.crt
+            #   name: powerdns-secrets
+            #   subPath: authentik_cert
           resources: {}
           # # FIXME: Better approach to dns-poststart
           # lifecycle:
@@ -189,8 +107,7 @@ spec:
             claimName: powerdns-admin
         - name: powerdns-secrets
           secret:
-            secretName: powerdns
-          # note: the leading zero means this number is in octal representation: do not remove it
+            secretName: powerdns-config
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress

@@ -7,5 +7,5 @@ resources:
   - auth-web-service.yaml
   - jinja-templates.yaml
   - pdns-ingress.yaml
-  - powerdns-admin.yaml
-  - powerdns-admin-configmap.yaml
+  # - powerdns-admin.yaml
+  # - powerdns-admin-configmap.yaml
