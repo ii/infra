@@ -59,21 +59,21 @@ resource "kubernetes_secret_v1" "coder" {
   }
 
   data = {
-    password                          = random_string.coder_postgresql_password.result
-    postgres-password                 = random_string.coder_postgresql_password.result
-    CODER_PG_CONNECTION_URL           = "postgres://postgres:${random_string.coder_postgresql_password.result}@coder-db-postgresql.coder.svc.cluster.local:5432/coder?sslmode=disable"
-    TUNNELD_WIREGUARD_KEY             = random_bytes.tunneld_key.base64
-    PDNS_TSIG_KEY                     = var.rfc2136_tsig_key
-    PDNS_API_KEY                      = var.pdns_api_key
-    CODER_PASSWORD                    = random_string.coder_password.result
-    CODER_OAUTH2_GITHUB_CLIENT_ID     = var.coder_oauth2_github_client_id
-    CODER_OAUTH2_GITHUB_CLIENT_SECRET = var.coder_oauth2_github_client_secret
-    CODER_GITAUTH_0_CLIENT_ID         = var.coder_gitauth_0_client_id
-    CODER_GITAUTH_0_CLIENT_SECRET     = var.coder_gitauth_0_client_secret
-    CODER_OIDC_CLIENT_ID              = random_string.authentik_coder_oidc_client_id.result
-    CODER_OIDC_CLIENT_SECRET          = random_string.authentik_coder_oidc_client_secret.result
-    METAL_AUTH_TOKEN                  = var.equinix_metal_auth_token
-    TF_VAR_metal_project              = var.equinix_metal_project_id
+    password                 = random_string.coder_postgresql_password.result
+    postgres-password        = random_string.coder_postgresql_password.result
+    CODER_PG_CONNECTION_URL  = "postgres://postgres:${random_string.coder_postgresql_password.result}@coder-db-postgresql.coder.svc.cluster.local:5432/coder?sslmode=disable"
+    TUNNELD_WIREGUARD_KEY    = random_bytes.tunneld_key.base64
+    PDNS_TSIG_KEY            = var.rfc2136_tsig_key
+    PDNS_API_KEY             = var.pdns_api_key
+    CODER_PASSWORD           = random_string.coder_password.result
+    CODER_OIDC_CLIENT_ID     = random_bytes.authentik_coder_oidc_client_id.hex
+    CODER_OIDC_CLIENT_SECRET = random_bytes.authentik_coder_oidc_client_secret.hex
+    METAL_AUTH_TOKEN         = var.equinix_metal_auth_token
+    TF_VAR_metal_project     = var.equinix_metal_project_id
+    # CODER_OAUTH2_GITHUB_CLIENT_ID     = var.coder_oauth2_github_client_id
+    # CODER_OAUTH2_GITHUB_CLIENT_SECRET = var.coder_oauth2_github_client_secret
+    # CODER_GITAUTH_0_CLIENT_ID         = var.coder_gitauth_0_client_id
+    # CODER_GITAUTH_0_CLIENT_SECRET     = var.coder_gitauth_0_client_secret
     # GITHUB_TOKEN                      = ""
   }
   depends_on = [
