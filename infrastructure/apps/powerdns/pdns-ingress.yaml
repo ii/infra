@@ -10,7 +10,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: ${PDNS_API_INGRESS}
+    - host: ${PDNS_API_INGRESS:=dns.sharing.io}
       http:
         paths:
           - backend:
@@ -23,4 +23,4 @@ spec:
   tls:
     - secretName: "pdns-tls"
       hosts:
-        - ${PDNS_API_INGRESS}
+        - ${PDNS_API_INGRESS:=dns.sharing.io}
