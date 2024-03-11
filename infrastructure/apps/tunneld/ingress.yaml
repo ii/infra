@@ -46,4 +46,4 @@ spec:
     - hosts:
         - "${TUNNELD_WILDCARD_DOMAIN}"
         - "*.${TUNNELD_WILDCARD_DOMAIN}"
-      secretName: try-tls
+      secretName: try-wildcard-tls
