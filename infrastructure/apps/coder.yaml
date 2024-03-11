@@ -27,6 +27,8 @@ spec:
   # dependsOn:
   #   - name: coder-db
   path: "./infrastructure/apps/coder"
+  dependsOn:
+    - name: authentik
   sourceRef:
     kind: GitRepository
     name: flux-system
