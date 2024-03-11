@@ -33,6 +33,8 @@ spec:
           name: coder-config
       - secretRef:
           name: coder-config
+      - secretRef:
+          name: coder-override
       service:
         type: ClusterIP
         externalTrafficPolicy: Local
