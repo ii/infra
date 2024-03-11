@@ -57,6 +57,57 @@ module "sharing-io-record-dns-ip" {
 
   depends_on = [module.sharing-io]
 }
+resource "powerdns_zone" "try" {
+  name        = "try.sharing.io."
+  kind        = "Native"
+  nameservers = ["ns1.sharing.io.", "ns2.sharing.io."]
+}
+resource "powerdns_record" "try-A" {
+  zone       = "try.sharing.io."
+  name       = "try.sharing.io."
+  type       = "A"
+  ttl        = 300
+  records    = [module.sharing-io.cluster_ingress_ip]
+  depends_on = [powerdns_zone.try]
+}
+resource "powerdns_record" "try-WILDCARD" {
+  zone       = "try.sharing.io."
+  name       = "*.try.sharing.io."
+  type       = "A"
+  ttl        = 300
+  records    = [module.sharing-io.cluster_ingress_ip]
+  depends_on = [powerdns_zone.try]
+}
+resource "powerdns_record" "wg-A" {
+  # TUNNELD_WIREGUARD_ENDPOINT
+  zone       = "sharing.io."
+  name       = "wg.sharing.io."
+  type       = "A"
+  ttl        = 300
+  records    = [module.sharing-io.cluster_wireguard_ip]
+  depends_on = [powerdns_zone.try]
+}
+resource "powerdns_zone" "coder" {
+  name        = "coder.sharing.io."
+  kind        = "Native"
+  nameservers = ["ns1.sharing.io.", "ns2.sharing.io."]
+}
+resource "powerdns_record" "coder-A" {
+  zone       = "coder.sharing.io."
+  name       = "coder.sharing.io."
+  type       = "A"
+  ttl        = 300
+  records    = [module.sharing-io.cluster_ingress_ip]
+  depends_on = [powerdns_zone.coder]
+}
+resource "powerdns_record" "coder-WILDCARD" {
+  zone       = "coder.sharing.io."
+  name       = "*.coder.sharing.io."
+  type       = "A"
+  ttl        = 300
+  records    = [module.sharing-io.cluster_ingress_ip]
+  depends_on = [powerdns_zone.coder]
+}
 module "sharing-io-record-wireguard-ip" {
   source = "./terraform/rfc2136-record-assign"
 

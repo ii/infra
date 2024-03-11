@@ -36,6 +36,10 @@ terraform {
       source  = "hashicorp/random"
       version = "3.6.0"
     }
+    powerdns = {
+      source  = "pan-net/powerdns"
+      version = "1.5.0"
+    }
   }
   backend "kubernetes" {
     secret_suffix = "state"
@@ -98,4 +102,8 @@ provider "authentik" {
   token = module.sharing-io-manifests.authentik_bootstrap_token
   # Optionally set insecure to ignore TLS Certificates
   # insecure = true
+}
+provider "powerdns" {
+  api_key    = var.pdns_api_key
+  server_url = var.pdns_host
 }
