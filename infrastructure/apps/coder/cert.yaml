@@ -1,0 +1,15 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: coder-wildcard-cert
+  namespace: coder
+spec:
+  secretName: coder-wildcard-tls
+  dnsNames:
+    - "*.coder.${CODER_WILDCARD_DOMAIN}"
+    - "coder.${CODER_WILDCARD_DOMAIN}"
+  issuerRef:
+    name: letsencrypt-rfc2136
+    kind: ClusterIssuer
+    group: cert-manager.io

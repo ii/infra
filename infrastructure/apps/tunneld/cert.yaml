@@ -3,15 +3,15 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: try
+  name: try-wildcard-cert
   namespace: coder
 spec:
-  issuerRef:
-    name: letsencrypt-pdns
-    group: cert-manager.io
-    kind: ClusterIssuer
   commonName: "*.${TUNNELD_WILDCARD_DOMAIN}"
-  secretName: try-tls
+  secretName: try-wildcard-tls
   dnsNames:
     - "${TUNNELD_WILDCARD_DOMAIN}"
     - "*.${TUNNELD_WILDCARD_DOMAIN}"
+  issuerRef:
+    name: letsencrypt-rfc2136
+    kind: ClusterIssuer
+    group: cert-manager.io
