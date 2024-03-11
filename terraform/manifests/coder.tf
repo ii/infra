@@ -47,6 +47,7 @@ resource "kubernetes_config_map" "coder_kustomize" {
     CODER_WILDCARD_DOMAIN   = "sharing.io"
     CODER_VERSION           = "2.8.5" # Lastest as of March 9th 2024
     TUNNELD_WILDCARD_DOMAIN = "try.${var.domain}"
+    wg_ip                   = var.wg_ip
   }
   depends_on = [
     kubernetes_namespace.flux-system

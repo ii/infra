@@ -85,6 +85,8 @@ module "sharing-io-manifests" {
   equinix_metal_metro      = local.metro
   equinix_metal_auth_token = var.equinix_metal_auth_token
   ingress_ip               = module.sharing-io.cluster_ingress_ip
+  dns_ip                   = module.sharing-io.cluster_dns_ip
+  wg_ip                    = module.sharing-io.cluster_wireguard_ip
   acme_email_address       = "acme@ii.coop"
   rfc2136_algorithm        = "HMACSHA256"
   rfc2136_nameserver       = var.rfc2136_nameserver

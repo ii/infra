@@ -71,6 +71,16 @@ variable "ingress_ip" {
   type        = string
   default     = ""
 }
+variable "dns_ip" {
+  description = "ip for the Power DNS service"
+  type        = string
+  default     = ""
+}
+variable "wg_ip" {
+  description = "ip for the WireGuard tunneld service"
+  type        = string
+  default     = ""
+}
 
 variable "domain" {
   description = "the DNS domain for records and certs"

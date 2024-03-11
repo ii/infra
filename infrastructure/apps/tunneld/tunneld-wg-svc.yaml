@@ -16,3 +16,5 @@ spec:
     targetPort: 54321
   selector:
     app: tunneld
+  externalIPs:
+    - "${wg_ip}"
