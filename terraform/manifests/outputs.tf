@@ -16,3 +16,9 @@ output "authentik_coder_oidc_client_id" {
 output "authentik_coder_oidc_client_secret" {
   value = random_string.authentik_coder_oidc_client_secret.result
 }
+output "coder_admin_password" {
+  value = random_string.coder_password.result
+}
+output "coder_admin_user" {
+  value = "coder" # we may want to set this elsewhere
+}

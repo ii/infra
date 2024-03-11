@@ -25,3 +25,10 @@ output "sharing-io-cluster-apiserver-ip" {
 output "sharing-io-cluster-ingress-ip" {
   value = module.sharing-io.cluster_ingress_ip
 }
+output "coder_admin_user" {
+  value = module.sharing-io-manifests.coder_admin_user
+}
+output "coder_admin_password" {
+  value     = module.sharing-io-manifests.coder_admin_password
+  sensitive = true
+}
