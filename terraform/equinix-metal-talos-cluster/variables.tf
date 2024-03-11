@@ -53,7 +53,7 @@ variable "kubernetes_version" {
 }
 variable "ipxe_script_url" {
   type        = string
-  default     = "https://pxe.factory.talos.dev/pxe/0c2f6ca92c4bb5f7b79de5849bd2e96e026df55e4c18939df217e4f7d092a7c6/v1.6.5/metal-amd64"
+  default     = ""
   description = "https://factory.talos.dev"
 }
 
