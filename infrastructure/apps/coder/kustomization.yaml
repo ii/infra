@@ -4,4 +4,4 @@ resources:
   - helm-repo.yaml
   - helm-release.yaml
   - ingress.yaml
-  # - create-admin-job.yaml
+  - create-admin-job.yaml

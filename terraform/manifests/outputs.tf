@@ -17,7 +17,7 @@ output "authentik_coder_oidc_client_secret" {
   value = random_bytes.authentik_coder_oidc_client_secret.hex
 }
 output "coder_admin_password" {
-  value = random_string.coder_password.result
+  value = random_string.coder_first_user_password.result
 }
 output "coder_admin_user" {
   value = "coder" # we may want to set this elsewhere

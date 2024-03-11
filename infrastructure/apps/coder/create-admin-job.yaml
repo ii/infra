@@ -12,11 +12,10 @@ spec:
       restartPolicy: OnFailure
       containers:
         - name: create-admin
-          image: "ghcr.io/coder/coder:v2.8.5"
-          # image: "ghcr.io/coder/coder:v${CODER_VERSION}"
-          command: ["/opt/coder", "server", "create-admin-user"]
+          # image: "ghcr.io/coder/coder:v2.8.5"
+          image: "ghcr.io/coder/coder:v${CODER_VERSION}"
+          command: ["/opt/coder", "login", "https://coder"]
           envFrom:
-            # used by /opt/coder server create-admin-user
             - configMapRef:
                 name: coder-config
             - secretRef:
