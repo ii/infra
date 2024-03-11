@@ -22,7 +22,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: "${TUNNEL_WILDCARD_DOMAIN=try.ii.nz}"
+    - host: "${TUNNELD_WILDCARD_DOMAIN}"
       http:
         paths:
           - backend:
@@ -32,7 +32,7 @@ spec:
                   name: http
             path: /
             pathType: ImplementationSpecific
-    - host: "*.${TUNNEL_WILDCARD_DOMAIN=try.ii.nz}"
+    - host: "*.${TUNNELD_WILDCARD_DOMAIN}"
       http:
         paths:
           - backend:
@@ -44,6 +44,6 @@ spec:
             pathType: ImplementationSpecific
   tls:
     - hosts:
-        - "${TUNNEL_WILDCARD_DOMAIN=try.ii.nz}"
-        - "*.${TUNNEL_WILDCARD_DOMAIN=try.ii.nz}"
+        - "${TUNNELD_WILDCARD_DOMAIN}"
+        - "*.${TUNNELD_WILDCARD_DOMAIN}"
       secretName: try-tls
