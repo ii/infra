@@ -42,10 +42,11 @@ resource "kubernetes_config_map" "coder_kustomize" {
   }
 
   data = {
-    CODER_HOST            = "coder.sharing.io"
-    CODER_ACCESS_URL      = "https://coder.${var.domain}"
-    CODER_WILDCARD_DOMAIN = "sharing.io"
-    CODER_VERSION         = "2.8.5" # Lastest as of March 9th 2024
+    CODER_HOST              = "coder.sharing.io"
+    CODER_ACCESS_URL        = "https://coder.${var.domain}"
+    CODER_WILDCARD_DOMAIN   = "sharing.io"
+    CODER_VERSION           = "2.8.5" # Lastest as of March 9th 2024
+    TUNNELD_WILDCARD_DOMAIN = "try.${var.domain}"
   }
   depends_on = [
     kubernetes_namespace.flux-system
@@ -74,7 +75,7 @@ resource "kubernetes_secret_v1" "coder" {
     # CODER_OAUTH2_GITHUB_CLIENT_SECRET = var.coder_oauth2_github_client_secret
     CODER_GITAUTH_0_CLIENT_ID     = var.coder_gitauth_0_client_id
     CODER_GITAUTH_0_CLIENT_SECRET = var.coder_gitauth_0_client_secret
-    # GITHUB_TOKEN                      = ""
+    # "${TUNNELD_WIREGAURD_HOST=tunneld.sharing.io}:54321"
   }
   depends_on = [
     kubernetes_namespace.authentik
@@ -129,6 +130,19 @@ resource "kubernetes_config_map" "coder_config" {
     # CODER_OAUTH2_GITHUB_ALLOW_SIGNUPS = "true"
     CODER_BLOCK_DIRECT = "false"
     CODER_BROWSER_ONLY = "false"
+    # GITHUB_TOKEN                      = ""
+    TUNNELD_VERBOSE                  = "true"
+    TUNNELD_LISTEN_ADDRESS           = "0.0.0.0:12345"
+    TUNNELD_BASE_URL                 = "https://try.sharing.io"
+    TUNNELD_WIREGUARD_ENDPOINT       = "wg.sharing.io:54321"
+    TUNNELD_WIREGUARD_PORT           = "54321"
+    TUNNELD_WIREGUARD_MTU            = "1280"
+    TUNNELD_WIREGUARD_SERVER_IP      = "fcca::1"
+    TUNNELD_WIREGUARD_NETWORK_PREFIX = "fcca::/16"
+    TUNNELD_REAL_IP_HEADER           = "X-Forwarded-For"
+    TUNNELD_PPROF_LISTEN_ADDRESS     = ""
+    # TUNNELD_TRACING_HONEYCOMB_TEAM = ""
+    # TUNNELD_TRACING_INSTANCE_ID
     # CODER_DERP_SERVER_REGION_NAME        = "Coder Embedded Relay"
     # CODER_DERP_FORCE_WEBSOCKETS          = "false"
     # CODER_DERP_SERVER_ENABLE             = "true"

@@ -1,0 +1,17 @@
+# certificate resource yaml
+
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: try
+  namespace: coder
+spec:
+  issuerRef:
+    name: letsencrypt-pdns
+    group: cert-manager.io
+    kind: ClusterIssuer
+  commonName: "*.${TUNNELD_WILDCARD_DOMAIN}"
+  secretName: try-tls
+  dnsNames:
+    - "${TUNNELD_WILDCARD_DOMAIN}"
+    - "*.${TUNNELD_WILDCARD_DOMAIN}"

@@ -1,0 +1,39 @@
+# tunneld-deployment.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tunneld
+  namespace: coder
+  labels:
+    app: tunneld
+    app.kubernetes.io/name: wgtunnel
+    app.kubernetes.io/component: tunneld
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: tunneld
+      app.kubernetes.io/name: wgtunnel
+      app.kubernetes.io/component: tunneld
+  template:
+    metadata:
+      labels:
+        app: tunneld
+        app.kubernetes.io/name: wgtunnel
+        app.kubernetes.io/component: tunneld
+    spec:
+      hostNetwork: true
+      containers:
+        - name: tunneld
+          envFrom:
+          - configMapRef:
+            name: coder-config
+          - secretRef:
+            name: coder-config
+          - secretRef:
+            name: coder-override
+          image:
+            ghcr.io/ii/tunneld:0.1.10-sharing

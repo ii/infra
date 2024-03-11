@@ -1,0 +1,18 @@
+# tunneld-api-svc.yaml
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: tunneld-api
+  namespace: coder
+spec:
+  type: ClusterIP
+  internalTrafficPolicy: Cluster
+  ipFamilyPolicy: SingleStack
+  ports:
+  - port: 80
+    name: http
+    protocol: TCP
+    targetPort: 12345
+  selector:
+    app: tunneld

@@ -1,0 +1,8 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - tunneld-wg-svc.yaml
+  - tunneld-api-svc.yaml
+  - tunneld-deployment.yaml
+  - cert.yaml
+  - ingress.yaml
