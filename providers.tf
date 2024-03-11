@@ -70,7 +70,7 @@ provider "dns" {
 }
 provider "kubernetes" {
   alias       = "sharing-io"
-  config_path = "./tmp/sharing.io-kubeconfig"
+  config_path = "./tmp/sharing-io-kubeconfig"
   # host                   = "https://${module.sharing-io.kubeconfig.node}:6443"
   # client_certificate     = base64decode(module.sharing-io.kubeconfig.kubernetes_client_configuration.client_certificate)
   # client_key             = base64decode(module.sharing-io.kubeconfig.kubernetes_client_configuration.client_key)
@@ -79,7 +79,7 @@ provider "kubernetes" {
 provider "flux" {
   alias = "sharing-io"
   kubernetes = {
-    config_path = "./tmp/sharing.io-kubeconfig"
+    config_path = "./tmp/sharing-io-kubeconfig"
     # host                   = "https://${module.sharing-io.kubeconfig.node}:6443"
     # client_certificate     = base64decode(module.sharing-io.kubeconfig.kubernetes_client_configuration.client_certificate)
     # client_key             = base64decode(module.sharing-io.kubeconfig.kubernetes_client_configuration.client_key)

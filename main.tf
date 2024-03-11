@@ -44,7 +44,14 @@ module "sharing-io-record-ingress-ip" {
 
   depends_on = [module.sharing-io]
 }
+resource "local_sensitive_file" "sharingio-kubeconfig" {
+  content  = module.sharing-io.kubeconfig.kubeconfig_raw
+  filename = "./tmp/sharing-io-kubeconfig"
 
+  lifecycle {
+    ignore_changes = all
+  }
+}
 module "sharing-io-manifests" {
   source = "./terraform/manifests"
 
@@ -70,7 +77,7 @@ module "sharing-io-manifests" {
     kubernetes = kubernetes.sharing-io
     random     = random
   }
-  depends_on = [module.sharing-io]
+  depends_on = [local_sensitive_file.sharingio-kubeconfig, module.sharing-io]
 }
 
 module "sharing-io-flux-bootstrap" {
@@ -85,7 +92,7 @@ module "sharing-io-flux-bootstrap" {
     github = github
     flux   = flux.sharing-io
   }
-  depends_on = [module.sharing-io-manifests]
+  depends_on = [local_sensitive_file.sharingio-kubeconfig, module.sharing-io-manifests]
 }
 
 module "sharing-io-flux-github-webhook" {
