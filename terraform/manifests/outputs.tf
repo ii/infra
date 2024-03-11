@@ -11,10 +11,10 @@ output "authentik_secret_key" {
   value = random_string.authentik_secret_key.result
 }
 output "authentik_coder_oidc_client_id" {
-  value = random_string.authentik_coder_oidc_client_id.hex
+  value = random_bytes.authentik_coder_oidc_client_id.hex
 }
 output "authentik_coder_oidc_client_secret" {
-  value = random_string.authentik_coder_oidc_client_secret.hex
+  value = random_bytes.authentik_coder_oidc_client_secret.hex
 }
 output "coder_admin_password" {
   value = random_string.coder_password.result
