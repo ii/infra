@@ -106,16 +106,8 @@ resource "kubernetes_config_map" "authentik_blueprints" {
 
 resource "random_bytes" "authentik_coder_oidc_client_id" {
   length = 32
-  # special = false
-  # lower   = true
-  # upper   = true
-  # numeric = true
 }
 
 resource "random_bytes" "authentik_coder_oidc_client_secret" {
   length = 32
-  # special = false
-  # lower   = true
-  # upper   = true
-  # numeric = true
 }
