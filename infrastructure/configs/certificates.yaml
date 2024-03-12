@@ -14,19 +14,3 @@ spec:
     name: letsencrypt-rfc2136
     kind: ClusterIssuer
     group: cert-manager.io
----
-apiVersion: cert-manager.io/v1
-kind: Certificate
-metadata:
-  name: wildcard-cert
-  namespace: coder
-spec:
-  secretName: wildcard-tls
-  dnsNames:
-    - "*.${domain}"
-    - "${domain}"
-    - "whataboutthistime.${domain}"
-  issuerRef:
-    name: letsencrypt-rfc2136
-    kind: ClusterIssuer
-    group: cert-manager.io
