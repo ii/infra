@@ -1,6 +1,6 @@
 // TODO use instance pool?
 
-resource "oci_core_instance" "cp" {
+resource "oci_core_instance" "controlplane" {
   count = 1
   #Required
   availability_domain = var.instance_availability_domain

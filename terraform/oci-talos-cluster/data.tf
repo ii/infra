@@ -1,21 +1,13 @@
+data "oci_identity_compartment" "this" {
+  id = var.compartment_id
+}
+
 data "talos_image_factory_extensions_versions" "this" {
   # get the latest talos version
   talos_version = var.talos_version
   filters = {
     names = local.talos_extensions
   }
-}
-
-resource "talos_image_factory_schematic" "this" {
-  schematic = yamlencode(
-    {
-      customization = {
-        systemExtensions = {
-          officialExtensions = data.talos_image_factory_extensions_versions.this.extensions_info.*.name
-        }
-      }
-    }
-  )
 }
 
 data "talos_image_factory_urls" "this" {
@@ -48,6 +40,7 @@ data "talos_cluster_kubeconfig" "kubeconfig" {
 }
 
 data "talos_machine_configuration" "controlplane" {
+  for_each         = oci_core_instance.controlplane
   cluster_name     = var.cluster_name
   cluster_endpoint = "https://${var.kube_apiserver_domain}:6443"
 

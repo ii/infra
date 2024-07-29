@@ -108,3 +108,23 @@ resource "oci_load_balancer_listener" "talos_listener" {
   port                     = 6443
   protocol                 = "TCP"
 }
+
+resource "oci_network_load_balancer_backend" "talos_backend" {
+  #Required
+  backend_set_name         = "talos"
+  network_load_balancer_id = oci_load_balancer_load_balancer.cp_load_balancer.id
+  port                     = 50000
+
+  #Optional
+  target_id = oci_core_instance.cp.id
+}
+
+resource "oci_network_load_balancer_backend" "controlplane_backend" {
+  #Required
+  backend_set_name         = "controlplane"
+  network_load_balancer_id = oci_load_balancer_load_balancer.cp_load_balancer.id
+  port                     = 6443
+
+  #Optional
+  target_id = oci_core_instance.cp.id
+}
