@@ -1,0 +1,5 @@
+#+title: oci-talos-cluster
+
+#+begin_quote
+deploy a Talos Cluster on Oracle Cloud
+#+end_quote
