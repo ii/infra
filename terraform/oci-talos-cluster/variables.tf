@@ -9,6 +9,9 @@ variable "project" {
   type    = string
   default = "main"
 }
+variable "instance_availability_domain" {
+  default = "bzBe:US-SANJOSE-1-AD-1"
+}
 variable "region" {
   description = "the OCI region where resources will be created"
   type        = string
@@ -41,4 +44,7 @@ variable "talos_version" {
 variable "kubernetes_version" {
   type    = string
   default = "v1.30.0"
+}
+variable "instance_shape" {
+  default = "VM.Standard.A1.Flex"
 }
