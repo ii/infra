@@ -1,3 +1,39 @@
+variable "kubernetes_version" {
+  type        = string
+  default     = "v1.30.0"
+  description = "the version of Kubernetes to deploy"
+}
+
+variable "kubernetes_control_plane_nodes" {
+  type        = number
+  default     = 3
+  description = "the number of control plane nodes to deploy"
+}
+
+variable "talos_version" {
+  type        = string
+  default     = "v1.7.1"
+  description = "the version of Talos to deploy"
+}
+
+variable "talos_install_disk" {
+  type        = string
+  default     = "/dev/sda"
+  description = "the disk for Talos to completely claim"
+}
+
+variable "longhorn_disk" {
+  type        = string
+  default     = "/dev/sdb"
+  description = "the disk for Longhorn to completely claim"
+}
+
+variable "ceph_disk" {
+  type        = string
+  default     = "/dev/X"
+  description = "the disk for Rook/CEPH to completely claim"
+}
+
 variable "equinix_metal_project_id" {
   description = "the project ID for the Equinix Metal project"
   type        = string
@@ -10,8 +46,26 @@ variable "equinix_metal_auth_token" {
   default     = ""
 }
 
+variable "equinix_metal_metro" {
+  description = "the metro"
+  type        = string
+  default     = "sv"
+}
+
+variable "equinix_metal_plan" {
+  description = "the plan"
+  type        = string
+  default     = "c3.medium.x86"
+}
+
+variable "domain" {
+  description = "the root DNS zone for this cluster"
+  type        = string
+  default     = ""
+}
+
 variable "rfc2136_nameserver" {
-  description = "the DNS zone"
+  description = "the DNS server for nsupdates"
   type        = string
   default     = ""
 }
@@ -20,6 +74,12 @@ variable "rfc2136_tsig_keyname" {
   description = "the tsig key name for talking to a RFC2136 compliant DNS server"
   type        = string
   default     = ""
+}
+
+variable "rfc2136_tsig_algorithm" {
+  description = "the tsig algorithm for talking to a RFC2136 compliant DNS server"
+  type        = string
+  default     = "HMACSHA256"
 }
 
 variable "rfc2136_tsig_key" {
@@ -37,7 +97,7 @@ variable "github_token" {
 variable "github_org" {
   type        = string
   description = "the org for the Flux repo (ii)"
-  default     = "ii"
+  default     = "sharingio"
 }
 
 variable "github_repository" {
@@ -90,4 +150,16 @@ variable "coder_gitauth_0_client_secret" {
   description = "Retrieving a RW token to save prs / commits etc in workspaces"
   type        = string
   default     = ""
+}
+variable "coder_version" {
+  description = "Version of coder"
+  type        = string
+  default     = "v2.10.2"
+  # https://github.com/coder/coder/releases/tag/v2.10.2
+}
+variable "authentik_version" {
+  description = "Version of authentik"
+  type        = string
+  default     = "2024.4.1"
+  # https://github.com/goauthentik/authentik/releases/tag/version%2F2024.2.3
 }

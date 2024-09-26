@@ -10,10 +10,10 @@ variable "github_repository" {
   default     = "infra"
 }
 
-variable "cluster_name" {
+variable "cluster" {
   type        = string
   description = "the target cluster name"
-  default     = ""
+  default     = "cluster"
 }
 
 variable "kubeconfig" {

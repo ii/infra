@@ -12,9 +12,9 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  # postBuild:
-  #   substituteFrom:
-  #     - kind: Secret
-  #       # NOTE: contains the value "domain" but we may need or like
-  #       #       to swap it out for a Secret which makes more sense
-  #       name: rfc2136dnsserver
+  postBuild:
+    substituteFrom:
+        # NOTE: contains the value "domain" but we may need or like
+        #       to swap it out for a Secret which makes more sense
+      - kind: Secret
+        name: rfc2136dnsserver

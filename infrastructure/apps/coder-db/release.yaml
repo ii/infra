@@ -22,6 +22,8 @@ spec:
         namespace: flux-system
       interval: 12h
   values:
+    commonAnnotations:
+      ii/config-hash: "${confighash}"
     auth:
       existingSecret: coder-config
       username: coder

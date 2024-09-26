@@ -28,3 +28,9 @@ spec:
       version: 1.14.4
   values:
     installCRDs: true
+    global:
+      logLevel: 6
+    extraArgs:
+      - --enable-certificate-owner-ref=true
+      - --dns01-recursive-nameservers-only
+      - --dns01-recursive-nameservers=${nameserver}:53,1.1.1.1:53,8.8.8.8:53

@@ -23,7 +23,7 @@ resource "kubernetes_secret_v1" "rfc2136-dns-server" {
     nameserver = var.rfc2136_nameserver
     keyname    = var.rfc2136_tsig_keyname
     key        = var.rfc2136_tsig_key
-    algorithm  = var.rfc2136_algorithm
+    algorithm  = var.rfc2136_tsig_algorithm
     domain     = var.domain
     pdnsapikey = var.pdns_api_key
     pdnshost   = var.pdns_host

@@ -1,0 +1,11 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./kubevirt.yaml
+  - ./manager-ingress.yaml
+  - https://github.com/kubevirt/containerized-data-importer/releases/download/v1.59.0/cdi-operator.yaml
+  - https://github.com/kubevirt/containerized-data-importer/releases/download/v1.59.0/cdi-cr.yaml
+  - https://raw.githubusercontent.com/kubevirt-manager/kubevirt-manager/main/kubernetes/bundled.yaml
+  # - https://github.com/kubevirt/kubevirt/releases/download/v1.2.0/kubevirt-operator.yaml
+  # - https://github.com/kubevirt/kubevirt/releases/download/v1.2.0/kubevirt-cr.yaml

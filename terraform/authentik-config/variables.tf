@@ -46,3 +46,8 @@ variable "authentik_bootstrap_token" {
   description = "Authentik ADMIN token for use with terraform"
   type        = string
 }
+
+variable "domain" {
+  description = "root domain hosting our services"
+  type        = string
+}

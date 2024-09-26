@@ -5,12 +5,10 @@ metadata:
     app: powerdns
   name: pdns
   namespace: powerdns
-  annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-http01"
 spec:
   ingressClassName: nginx
   rules:
-    - host: ${PDNS_API_INGRESS:=dns.sharing.io}
+    - host: ${PDNS_API_INGRESS}
       http:
         paths:
           - backend:
@@ -21,6 +19,6 @@ spec:
             path: /
             pathType: ImplementationSpecific
   tls:
-    - secretName: "pdns-tls"
+    - secretName: "wildcard-tls"
       hosts:
-        - ${PDNS_API_INGRESS:=dns.sharing.io}
+        - ${PDNS_API_INGRESS}

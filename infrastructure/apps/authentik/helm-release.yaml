@@ -15,7 +15,7 @@ spec:
   chart:
     spec:
       chart: authentik
-      version: "2024.2.2"
+      version: "${AUTHENTIK_VERSION}"
       sourceRef:
         kind: HelmRepository
         name: authentik
@@ -25,11 +25,19 @@ spec:
     # https://github.com/goauthentik/helm/blob/c51952b024451ee90fc3603fae24f39472b1b197/charts/authentik/templates/server-deployment.yaml#L77
     # https://github.com/goauthentik/helm/blob/c51952b024451ee90fc3603fae24f39472b1b197/charts/authentik/templates/worker-deployment.yaml#L80
     global:
+      podAnnotations:
+        ii/config-hash: "${confighash}"
       envFrom:
         - configMapRef:
             name: authentik-env
         - secretRef:
             name: authentik-env
+        - configMapRef:
+            name: authentik-override
+            optional: true
+        - secretRef:
+            name: authentik-override
+            optional: true
       env:
         - name: AUTHENTIK_ERROR_REPORTING__ENABLED
           value: "true"
@@ -37,10 +45,8 @@ spec:
       ingress:
         ingressClassName: "nginx"
         enabled: true
-        annotations:
-          cert-manager.io/cluster-issuer: "letsencrypt-http01"
         tls:
-          - secretName: authentik-tls
+          - secretName: wildcard-tls
             hosts:
               - "${authentik_host}"
         hosts:

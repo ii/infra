@@ -50,13 +50,11 @@ spec:
     ingress:
       enabled: true
       tls: true
-      tlsSecret: longhorn-tls
+      tlsSecret: wildcard-tls
       ingressClassName: nginx
       # tls: true
-      # host: "longhorn.${domain}"
-      host: "longhorn.sharing.io"
-      annotations:
-        cert-manager.io/cluster-issuer: "letsencrypt-http01"
+      host: "longhorn.${domain}"
+      # host: "longhorn.sharing.io"
     # enablePSP: true
     # namespaceOverride: "longhorn"
     # kubernetes.io/tls-acme: true

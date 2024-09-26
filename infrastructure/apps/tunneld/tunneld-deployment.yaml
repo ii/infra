@@ -34,6 +34,7 @@ spec:
               name: coder-config
           - secretRef:
               name: coder-override
+              optional: true
           image:
             ghcr.io/ii/tunneld:0.1.10-sharing
           ports:

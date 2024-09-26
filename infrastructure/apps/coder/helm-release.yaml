@@ -20,6 +20,8 @@ spec:
       interval: 12h
   values:
     coder:
+      podAnnotations:
+        ii/config-hash: "${confighash}"
       envUseClusterAccessURL: false
       env:
       #  https://github.com/coder/coder/blob/v2.8.5/helm/coder/templates/service.yaml#L32-L49
@@ -33,8 +35,12 @@ spec:
           name: coder-config
       - secretRef:
           name: coder-config
+      - configMapRef:
+          name: coder-override
+          optional: true
       - secretRef:
           name: coder-override
+          optional: true
       service:
         type: ClusterIP
         externalTrafficPolicy: Local

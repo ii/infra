@@ -1,0 +1,41 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: capi-operator
+  namespace: flux-system
+spec:
+  interval: 30m
+  install:
+    createNamespace: true
+  targetNamespace: cluster-api
+  releaseName: capi-operator
+  storageNamespace: flux-system
+  chart:
+    spec:
+      chart: cluster-api-operator
+      version: "0.10.1"
+      sourceRef:
+        kind: HelmRepository
+        name: capi-operator
+        namespace: flux-system
+      interval: 24h
+  values:
+    logLevel: 4
+    tolerations: [] # we only have control planes for now, TODO more nodes
+    image:
+      manager:
+        image: registry.k8s.io/cluster-api/cluster-api-controller
+        tag: v0.10.1
+    manager:
+      featureGates:
+        ClusterResourceSet: true # https://kubevirt-manager.io/get_started.html
+    # bootstrap: "kubeadm:v1.4.2"
+    # controlPlane: "kubeadm:v1.4.2"
+    # infrastructure: "X:V"
+    # addon:
+    #   x: true
+    # env:
+    # manager:
+    #   - name: FOO
+    #     value: BAR

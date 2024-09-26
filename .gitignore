@@ -1,0 +1,12 @@
+.DS_Store
+.idea
+*.log
+tmp/
+.envrc
+.terraform
+.terraform.lock.hcl
+values.tfvars
+config.org
+secrets.org
+config.tfvars
+secrets.tfvars

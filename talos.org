@@ -1,0 +1,57 @@
+#+title: Talos Configuration
+* talos_version
+We need 1.7.0-beta.0 or later, due to bond0 and BPG route pushing issues.
+* Talos Linux Image Factory
+
+We need to provide two separate ipxe urls, one for the first boot (what is the installer itself), and then the image that is installed.
+
+https://pxe.factory.talos.dev/
+
+** ipxe_script_url
+
+This is the image we pass to equinix metal to boot.
+
+NOTE: ipxe_script_url must be not contain extensions and must contain the following kernel args
+*console=ttyS1,115200n8 talos.platform=equinixMetal*
+
+We don't use overlays yet...
+
+I'd love to have a CURL command for this...
+#+name: install.yaml
+#+begin_src yaml
+customization:
+    extraKernelArgs:
+        - console=ttyS1,115200n8
+        - talos.platform=equinixMetal
+#+end_src
+
+** talos_install_image
+
+#+begin_src
+talos_install_image = " factory.talos.dev/installer/25889b382ca7647e59d2a22d4cbb535e30d224f751b7e1d6ac677fb96fa1002d:v1.7.0-beta.0 "
+#+end_src
+
+This is the image we request Talos installs to the disk.
+
+NOTE: install image must contain the following kernel args
+*console=ttyS1,115200n8 talos.platform=equinixMetal*
+
+We use three system extensions:
+- siderolabs/gvisor
+- siderolabs/iscsi-tools
+- siderolabs/mdadm
+
+I'e love to be able to query an existing ipxe factore for it's config / kernel args / extensions etc
+
+#+name: install.yaml
+#+begin_src yaml
+customization:
+    extraKernelArgs:
+        - console=ttyS1,115200n8
+        - talos.platform=equinixMetal
+    systemExtensions:
+        officialExtensions:
+            - siderolabs/gvisor
+            - siderolabs/iscsi-tools
+            - siderolabs/mdadm
+#+end_src

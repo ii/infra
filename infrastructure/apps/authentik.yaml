@@ -18,3 +18,5 @@ spec:
     substituteFrom:
       - kind: ConfigMap
         name: authentik-kustomize
+      - kind: ConfigMap
+        name: authentik-config-hash

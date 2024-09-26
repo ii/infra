@@ -33,7 +33,7 @@ variable "rfc2136_tsig_key" {
   type        = string
   default     = ""
 }
-variable "rfc2136_algorithm" {
+variable "rfc2136_tsig_algorithm" {
   description = "the algorithm to use for rfc2136"
   type        = string
   default     = ""
@@ -92,6 +92,10 @@ variable "cluster_name" {
   type        = string
   default     = "a-very-cool-cluster"
 }
+variable "coder_version" {
+  description = "Version of Coder to deploy"
+  type        = string
+}
 variable "coder_oauth2_github_client_id" {
   description = "Authenticating Coder directly to github (bypassing authentik)"
   type        = string
@@ -106,5 +110,9 @@ variable "coder_gitauth_0_client_id" {
 }
 variable "coder_gitauth_0_client_secret" {
   description = "Retrieving a RW token to save prs / commits etc in workspaces"
+  type        = string
+}
+variable "authentik_version" {
+  description = "Version of Authentik to deploy"
   type        = string
 }

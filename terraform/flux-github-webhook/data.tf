@@ -6,6 +6,8 @@ data "kubernetes_resource" "receiver" {
     name      = "github-receiver"
     namespace = "flux-system"
   }
+
+  depends_on = [kubernetes_manifest.receiver]
 }
 
 # data "github_repository" "self" {

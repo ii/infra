@@ -9,5 +9,11 @@ terraform {
     equinix = {
       source = "equinix/equinix"
     }
+    dns = {
+      source = "hashicorp/dns"
+    }
+    http = {
+      source = "hashicorp/http"
+    }
   }
 }

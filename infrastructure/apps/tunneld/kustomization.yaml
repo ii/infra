@@ -4,5 +4,4 @@ resources:
   - tunneld-wg-svc.yaml
   - tunneld-api-svc.yaml
   - tunneld-deployment.yaml
-  - cert.yaml
   - ingress.yaml

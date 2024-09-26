@@ -36,3 +36,5 @@ spec:
     substituteFrom:
       - kind: ConfigMap
         name: coder-kustomize
+      - kind: ConfigMap
+        name: coder-config-hash

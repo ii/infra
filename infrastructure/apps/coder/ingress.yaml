@@ -42,7 +42,7 @@ spec:
             path: /
             pathType: Prefix
   tls:
-    - secretName: coder-wildcard-tls
+    - secretName: wildcard-tls
       hosts:
         - "${CODER_HOST}"
         - "*.${CODER_WILDCARD_DOMAIN}"

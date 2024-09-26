@@ -5,4 +5,3 @@ resources:
   - helm-release.yaml
   - ingress.yaml
   - create-admin-job.yaml
-  - cert.yaml

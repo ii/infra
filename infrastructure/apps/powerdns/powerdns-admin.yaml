@@ -114,12 +114,10 @@ kind: Ingress
 metadata:
   name: powerdns
   namespace: powerdns
-  annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-http01"
 spec:
   ingressClassName: nginx
   tls:
-    - secretName: "powerdns-tls"
+    - secretName: "wildcard-tls"
       hosts:
         - "${PDNS_ADMIN_INGRESS}"
   rules:

@@ -30,7 +30,7 @@ terraform {
     }
     authentik = {
       source  = "goauthentik/authentik"
-      version = "2024.2.0"
+      version = "2024.4.0"
     }
     random = {
       source  = "hashicorp/random"
@@ -40,11 +40,14 @@ terraform {
       source  = "pan-net/powerdns"
       version = "1.5.0"
     }
+    http = {
+      source  = "hashicorp/http"
+      version = "3.4.2"
+    }
   }
   backend "kubernetes" {
-    secret_suffix = "state"
-    config_path   = "~/.kube/config-fop"
-    namespace     = "tfstate"
+    secret_suffix = "cluster-state"
+    namespace     = "hh"
   }
 }
 provider "talos" {
@@ -73,33 +76,38 @@ provider "dns" {
   }
 }
 provider "kubernetes" {
-  alias       = "sharing-io"
-  config_path = "./tmp/sharing-io-kubeconfig"
-  # host                   = "https://${module.sharing-io.kubeconfig.node}:6443"
-  # client_certificate     = base64decode(module.sharing-io.kubeconfig.kubernetes_client_configuration.client_certificate)
-  # client_key             = base64decode(module.sharing-io.kubeconfig.kubernetes_client_configuration.client_key)
-  # cluster_ca_certificate = base64decode(module.sharing-io.kubeconfig.kubernetes_client_configuration.ca_certificate)
+  alias = "cluster"
+  # config_path = "./tmp/cluster-kubeconfig"
+  # config_path = "./tmp/kubeconfig"
+  # host                   = "https://${module.cluster.kubeconfig.node}:6443"
+  # We use an IP here to speed things up, the first nome name might work as well
+  host                   = "https://${module.cluster.cluster_node0_ip}:6443"
+  client_certificate     = base64decode(module.cluster.kubeconfig.kubernetes_client_configuration.client_certificate)
+  client_key             = base64decode(module.cluster.kubeconfig.kubernetes_client_configuration.client_key)
+  cluster_ca_certificate = base64decode(module.cluster.kubeconfig.kubernetes_client_configuration.ca_certificate)
 }
 provider "flux" {
-  alias = "sharing-io"
+  alias = "cluster"
   kubernetes = {
-    config_path = "./tmp/sharing-io-kubeconfig"
-    # host                   = "https://${module.sharing-io.kubeconfig.node}:6443"
-    # client_certificate     = base64decode(module.sharing-io.kubeconfig.kubernetes_client_configuration.client_certificate)
-    # client_key             = base64decode(module.sharing-io.kubeconfig.kubernetes_client_configuration.client_key)
-    # cluster_ca_certificate = base64decode(module.sharing-io.kubeconfig.kubernetes_client_configuration.ca_certificate)
+    # config_path = "./tmp/cluster-kubeconfig"
+    # host                   = "https://${module.cluster.kubeconfig.node}:6443"
+    # We use an IP here to speed things up, the first nome name might work as well
+    host                   = "https://${module.cluster.cluster_node0_ip}:6443"
+    client_certificate     = base64decode(module.cluster.kubeconfig.kubernetes_client_configuration.client_certificate)
+    client_key             = base64decode(module.cluster.kubeconfig.kubernetes_client_configuration.client_key)
+    cluster_ca_certificate = base64decode(module.cluster.kubeconfig.kubernetes_client_configuration.ca_certificate)
   }
   git = {
     url = "ssh://git@github.com/${var.github_org}/${var.github_repository}.git"
     ssh = {
       username    = "git"
-      private_key = module.sharing-io-flux-bootstrap.github_repository_deploy_key
+      private_key = module.cluster-flux-bootstrap.github_repository_deploy_key
     }
   }
 }
 provider "authentik" {
-  url   = "https://sso.sharing.io"
-  token = module.sharing-io-manifests.authentik_bootstrap_token
+  url   = "https://sso.${var.domain}"
+  token = module.cluster-manifests.authentik_bootstrap_token
   # Optionally set insecure to ignore TLS Certificates
   # insecure = true
 }
